@@ -1,0 +1,34 @@
+{
+  "name": "fcmp",
+  "version": "1.0.0",
+  "description": "The hottest fastcashmoney site on the web",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scyclow/fcmp.git"
+  },
+  "keywords": [
+    "fast",
+    "cash",
+    "money",
+    "plus",
+    "dot",
+    "biz"
+  ],
+  "author": "steve p",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/scyclow/fcmp/issues"
+  },
+  "homepage": "https://github.com/scyclow/fcmp#readme",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "mongoose": "^4.6.0",
+    "morgan": "^1.7.0"
+  }
+}
