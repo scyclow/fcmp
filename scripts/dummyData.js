@@ -15,7 +15,8 @@ User.remove({}, (err) => {
 
   User.create({
     email: 'steve@fast.plus',
-    username: 'Steve'
+    username: 'Steve',
+    password: '1234'
   }, (err, user) => {
     if (err) {
       console.error(`Error creating user: ${err}`);

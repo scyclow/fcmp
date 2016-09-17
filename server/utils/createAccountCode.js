@@ -35,18 +35,16 @@ function makeHash(min, max) {
     .slice(0, _.random(min, max));
 }
 
-function createAccountCode(len) {
-  return () => {
-    const hash = makeHash(8, 15);
+function createAccountCode() {
+  const hash = makeHash(8, 15);
 
-    const output = [
-      _.sample(keyWords),
-      _.sample(keyWords).toUpperCase(),
-      randInsert(hash, _.sample(keyWords).toUpperCase())
-    ].join('');
+  const output = [
+    _.sample(keyWords),
+    _.sample(keyWords).toUpperCase(),
+    randInsert(hash, _.sample(keyWords).toUpperCase())
+  ].join('');
 
-    return len ? output.slice(0, len) : output;
-  }
+  return len ? output.slice(0, len) : output;
 }
 
 module.exports = { createAccountCode, makeHash };
