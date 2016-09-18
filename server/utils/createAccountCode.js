@@ -38,13 +38,11 @@ function makeHash(min, max) {
 function createAccountCode() {
   const hash = makeHash(8, 15);
 
-  const output = [
+  return [
     _.sample(keyWords),
     _.sample(keyWords).toUpperCase(),
     randInsert(hash, _.sample(keyWords).toUpperCase())
   ].join('');
-
-  return len ? output.slice(0, len) : output;
 }
 
 module.exports = { createAccountCode, makeHash };

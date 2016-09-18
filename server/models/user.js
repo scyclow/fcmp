@@ -62,7 +62,7 @@ UserSchema.methods = {
     this.fastCashBalance += amount;
     return this.save(cb);
   },
-});
+};
 
 UserSchema.statics = {
   validateUser(username, password, cb) {

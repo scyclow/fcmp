@@ -1,28 +1,40 @@
-const mongoose = require('mongoose');
-const config = require('../config');
+require('../config/mongoose')(require('mongoose'));
+
+const _ = require('lodash');
 const User = require('../server/models/user');
 
-mongoose.connect(process.env.MONGO_URL || config.mongoURL, (err) => {
-  if (err) console.log(`Error connecting to mongo: ${err}`);
-  else console.log('Mongo connection established');
-});
+const userData = [
+  'steve',
+  'carl',
+  'joe',
+  'mike',
+  'brian',
+  'rebecca',
+  'sarah',
+  'elizabith',
+  'amanda',
+  'alex'
+].map(name => ({
+  email: `${name}@fast.plus`,
+  username: _.capitalize(name),
+  password: '1234'
+}));
 
-User.remove({}, (err) => {
-  if (err) {
+const cleanDB = () => User.remove({});
+const logUser = (user) => console.log(`Creating user: ${JSON.stringify(user, null, 3)}`);
+const createUsers = (userDate) => () => userDate.map(user => User.create(user));
+const verifyUsers = (usersCreated) => {
+  usersCreated.forEach(user => user.then(logUser));
+  return Promise.all(usersCreated);
+};
+
+
+cleanDB()
+  .then(createUsers(userData))
+  .then(verifyUsers)
+  .then(process.exit)
+  .catch(err => {
     console.error(`Error deleting data: ${err}`);
     process.exit();
-  }
-
-  User.create({
-    email: 'steve@fast.plus',
-    username: 'Steve',
-    password: '1234'
-  }, (err, user) => {
-    if (err) {
-      console.error(`Error creating user: ${err}`);
-      process.exit();
-    }
-    console.log('Created user: ', user);
-    process.exit();
   });
-});
+
