@@ -8,6 +8,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dummyData": "node ./scripts/dummyData.js"
   },
+  "engines": {
+    "node": "6.3.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/scyclow/fcmp.git"
