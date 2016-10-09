@@ -1,9 +1,11 @@
-const user = require('./user');
+const auth = require('../controllers/auth');
+const users = require('./users');
 
 module.exports = (app) => {
-  app.use('/api/user', user);
-
   app.get('/', (req, res) => {
     res.send('This is the root');
   });
+
+  app.use('/api/users', users);
+  app.post('/api/authenticate', auth.authenticate);
 };

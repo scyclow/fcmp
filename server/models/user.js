@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-const { createAccountCode } = require('../utils/createAccountCode');
-
 const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
+
+const { encryptPassword, validatePassword } = require('../utils/verification');
+const { createAccountCode } = require('../utils/createAccountCode');
 
 const UserSchema = new Schema({
   email: {
@@ -48,14 +48,20 @@ const UserSchema = new Schema({
   }
 });
 
-UserSchema.pre('save', encryptPassword);
+UserSchema.pre('save', function (next) {
+  if (!this.isModified('password')) return next();
+
+  encryptPassword(this.password)
+    .then(hash => {
+      this.password = hash;
+      next();
+    })
+    .catch(next)
+});
 
 UserSchema.methods = {
-  passwordValid (_password, cb) {
-    bcrypt.compare(_password, this.password, (err, isMatch) => {
-      if (err) return next(err);
-      cb(null, isMatch);
-    });
+  passwordValid (password) {
+    return validatePassword(this, password);
   },
 
   makeFastCash (amount, cb) {
@@ -66,31 +72,57 @@ UserSchema.methods = {
 
 UserSchema.statics = {
   validateUser(username, password, cb) {
-    this.findOne({ username }, (err, user) => {
-      if (err) return cb(err);
-      if (!user) return cb(null, false)
+    let user;
+    return this.findOne({ username })
+      .then(_user => {
+        if (!_user) {
+          cb(null, false);
+          throw new Error(`User with username: ${username} does not exist.`)
+        }
 
-      user.passwordValid(password, (err, isValid) => {
-        if (err) return cb(err);
+        user = _user;
+        return user.passwordValid(password);
+      })
+      .then(isValid => {
         cb(null, user, isValid);
+        return { user, isValid };
+      });
+  },
+
+  validateUserByEmail(email, password) {
+    return this.findOne({ email }).then(user => {
+      if (!user) throw new Error(`User with email: ${email} does not exist.`);
+
+      return user.passwordValid(password).then(isValid => {
+        if (!isValid) throw new Error('Password is invalid.');
+        return user;
       });
     });
   }
 }
 
+// async validateUserByEmail(email, password, cb) {
+//   const user = await this.findOne({ email });
+//   if (!user) {
+//     cb(null, false);
+//     throw new Error(`User with email: ${email} does not exist.`)
+//   }
+
+//   const isValid = await user.passwordValid(password);
+
+//   cb(null, user, isValid);
+//   return { user, isValid };
+// }
+
+// function promisify(fn) {
+//   return (...args) => new Promise((resolve, reject) => {
+//     fn(...args, (err, ...payload) => {
+//       if (err) reject(err);
+//       else resolve(...payload);
+//     });
+//   });
+// }
+
 const User = mongoose.model('User', UserSchema);
 
 module.exports = User;
-
-
-function encryptPassword(next) {
-  if (!this.isModified('password')) return next();
-
-  const saltRounds = 10;
-  bcrypt.hash(this.password, saltRounds, (err, hash) => {
-    if (err) return next(err);
-
-    this.password = hash;
-    next();
-  });
-}
