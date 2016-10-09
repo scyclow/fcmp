@@ -22,7 +22,7 @@ module.exports = (app) => {
   // Also might need to do something so session isn't saved in local memory -- reddis/mongoStore?
   // Also, probably don't need jwt, but might need it if making an api for non-web stuff
   app.use(session({
-    secret: config.secret,
+    secret: config.SECRET,
     resave: false
   }));
 

@@ -11,7 +11,7 @@ require('./config/express')(app);
 require('./server/routes')(app);
 
 // Start server
-const port = process.env.PORT || config.port;
+const port = config.PORT;
 const env = process.env.NODE_ENV || 'development';
 
 app.listen(port, (err) => {
