@@ -1,5 +1,5 @@
 const config = {
-  mongoURL: 'mongodb://localhost:27017/fcmp_prod',
+  MONGODB_URI: 'mongodb://localhost:27017/fcmp_prod',
   port: 8420,
   secret: 'dreamWEALTH!1FAST8z1poz',
 };
