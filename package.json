@@ -6,7 +6,8 @@
   "scripts": {
     "start": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dummyData": "node ./scripts/dummyData.js"
+    "dummyData": "node ./scripts/createDummyData.js",
+    "production": "npm install && NODE_ENV=production node index.js"
   },
   "engines": {
     "node": "6.3.0"

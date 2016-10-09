@@ -3,38 +3,27 @@ require('../config/mongoose')(require('mongoose'));
 const _ = require('lodash');
 const User = require('../server/models/user');
 
-const userData = [
-  'steve',
-  'carl',
-  'joe',
-  'mike',
-  'brian',
-  'rebecca',
-  'sarah',
-  'elizabith',
-  'amanda',
-  'alex'
-].map(name => ({
-  email: `${name}@fast.plus`,
-  username: _.capitalize(name),
-  password: '1234'
-}));
-
-const cleanDB = () => User.remove({});
+const cleanDB = (criteria = {}) => User.remove(criteria);
 const logUser = (user) => console.log(`Creating user: ${JSON.stringify(user, null, 3)}`);
-const createUsers = (userDate) => () => userDate.map(user => User.create(user));
-const verifyUsers = (usersCreated) => {
-  usersCreated.forEach(user => user.then(logUser));
-  return Promise.all(usersCreated);
-};
+const createUsers = (userData) => () => userData.map(user => User.create(user));
+const verifyUsers = (usersCreated) => Promise.all(
+  usersCreated.map(user => user.then(logUser))
+);
 
 
-cleanDB()
-  .then(createUsers(userData))
-  .then(verifyUsers)
-  .then(process.exit)
-  .catch(err => {
-    console.error(`Error deleting data: ${err}`);
-    process.exit();
-  });
+const createDummyData = (remove, userData) => {
+  if (!_.isArray(userData)) {
+    userData = [userData];
+  }
 
+  cleanDB(remove)
+    .then(createUsers(userData))
+    .then(verifyUsers)
+    .then(process.exit)
+    .catch(err => {
+      console.error(`Error deleting data: ${err}`);
+      process.exit();
+    });
+}
+
+module.exports = createDummyData;

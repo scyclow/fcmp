@@ -1,1 +1,2 @@
-web: NODE_ENV=production node index.js
+web: npm run production
+data: NODE_ENV=production node ./scripts/createSteve.js
