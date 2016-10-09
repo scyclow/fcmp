@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const config = require('../../config/env');
+const { SECRET } = require('../../config/env');
 
 function encryptPassword(password) {
   return new Promise((resolve, reject) => {
@@ -23,11 +23,20 @@ function validatePassword(user, _password) {
 
 function signJWT(user) {
   return new Promise((resolve, reject) => {
-    jwt.sign(user, config.SECRET, {}, (err, token) => {
+    jwt.sign(user, SECRET, {}, (err, token) => {
       if (err) reject(new Error('JWT not created'));
       else resolve(token);
     });
-  })
+  });
 }
 
-module.exports = { signJWT, encryptPassword, validatePassword };
+function verifyJWT(token) {
+  return new Promise((resolve, reject) => {
+    jwt.verify(token, SECRET, (err, decoded) => {
+      if (err) reject(new Error('Failed to authenticate token.'));
+      else resolve(decoded);
+    });
+  });
+}
+
+module.exports = { verifyJWT, signJWT, encryptPassword, validatePassword };

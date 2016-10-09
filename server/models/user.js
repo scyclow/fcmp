@@ -71,57 +71,25 @@ UserSchema.methods = {
 };
 
 UserSchema.statics = {
-  validateUser(username, password, cb) {
-    let user;
-    return this.findOne({ username })
-      .then(_user => {
-        if (!_user) {
-          cb(null, false);
-          throw new Error(`User with username: ${username} does not exist.`)
-        }
-
-        user = _user;
-        return user.passwordValid(password);
-      })
-      .then(isValid => {
-        cb(null, user, isValid);
-        return { user, isValid };
-      });
-  },
-
-  validateUserByEmail(email, password) {
-    return this.findOne({ email }).then(user => {
-      if (!user) throw new Error(`User with email: ${email} does not exist.`);
+  validateUser(identifier, password) {
+    return this.findOne(identifier).then(user => {
+      if (!user) throw new Error(`User with ${JSON.stringify(identifier)} does not exist.`);
 
       return user.passwordValid(password).then(isValid => {
         if (!isValid) throw new Error('Password is invalid.');
         return user;
       });
     });
+  },
+
+  findByToken(decoded) {
+    const _id = decoded._doc._id;
+    return this.findOne({ _id }).then(user => {
+      if (!user) throw new Error(`User ${_id} no longer exists.`);
+      else return user;
+    })
   }
 }
-
-// async validateUserByEmail(email, password, cb) {
-//   const user = await this.findOne({ email });
-//   if (!user) {
-//     cb(null, false);
-//     throw new Error(`User with email: ${email} does not exist.`)
-//   }
-
-//   const isValid = await user.passwordValid(password);
-
-//   cb(null, user, isValid);
-//   return { user, isValid };
-// }
-
-// function promisify(fn) {
-//   return (...args) => new Promise((resolve, reject) => {
-//     fn(...args, (err, ...payload) => {
-//       if (err) reject(err);
-//       else resolve(...payload);
-//     });
-//   });
-// }
 
 const User = mongoose.model('User', UserSchema);
 

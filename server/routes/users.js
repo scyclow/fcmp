@@ -1,12 +1,12 @@
 const { Router } = require('express');
 const users = require('../controllers/users');
-const User = require('../models/user');
+const auth = require('../controllers/auth');
 
 const router = Router();
 
 router.get('/', users.find);
 
 // should only work if authenticated
-router.get('/:id', users.findOne)
+router.get('/:id', auth.validate, users.findOne)
 
 module.exports = router;
