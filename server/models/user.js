@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const _ = require('lodash');
 const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
 
@@ -31,13 +32,13 @@ const UserSchema = new Schema({
     type: Number,
     default: 1
   },
-  children: [{
-    type: ObjectId,
-    ref: 'User'
-  }],
   parent: {
     type: ObjectId,
     ref: 'User'
+  },
+  parentBonus: {
+    type: Number,
+    default: 0.3
   },
   createdAt: {
     type: Date,
@@ -65,10 +66,41 @@ UserSchema.methods = {
     return validatePassword(this, password);
   },
 
-  makeFastCash (amount, cb) {
+  makeFastCash (amount, ignoreComission) {
     this.fastCashBalance += amount;
-    return this.save(cb);
+
+    return this.save()
+      // Pay tribute to thy parent
+      .then(() => !ignoreComission && this.getParent())
+      .then(parent => parent && parent.makeFastCash(amount * this.parentBonus))
+      .then(() => this);
   },
+
+  getParent () {
+    return this.model('User').findOne({ _id: this.parent });
+  },
+
+  getChildren (populate) {
+    const query = this.model('User').findOne({ parent: this._id });
+    return populate ? query : query.select('_id');
+  },
+
+  transfer(account, amount) {
+    if (this.fastCashBalance < amount) return Promise.reject(new Error(
+      `${this.username} does not have enough fastcash for this tansaction`
+    ));
+
+    return this.model('User')
+      .findByAccountCode(account)
+      .then(payee => {console.log(payee);return payee})
+      .then(payee => payee.makeFastCash(amount, true)
+        .then(() => this.makeFastCash(-amount, true))
+        .then(() => ({
+          payer: _.pick(this, ['username', 'fastCashBalance']),
+          payee: _.pick(payee, ['username', 'fastCashBalance']),
+        }))
+      );
+  }
 };
 
 UserSchema.statics = {
