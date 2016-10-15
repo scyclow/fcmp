@@ -12,7 +12,7 @@ router.get('/:accountCode', auth.validate, users.findOne)
 
 // TESTING
 if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
-  const User = require('../models/user');
+  const User = require('../models/User');
 
   router.post('/makeFastCash/:accountCode/:amount', (req, res) => {
     User.findByAccountCode(req.params.accountCode)

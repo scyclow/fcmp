@@ -1,4 +1,4 @@
-const User = require('../models/user');
+const User = require('../models/User');
 const { signJWT, verifyJWT } = require('../utils/verification');
 
 function authenticate (req, res) {

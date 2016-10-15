@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const User = require('../server/models/user');
+const User = require('../server/models/User');
 
 const connectMongo = require('../config/mongoose');
 
