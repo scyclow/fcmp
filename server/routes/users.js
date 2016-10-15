@@ -7,6 +7,6 @@ const router = Router();
 router.get('/', users.find);
 
 // should only work if authenticated
-router.get('/:id', auth.validate, users.findOne)
+router.get('/:accountCode', auth.validate, users.findOne)
 
 module.exports = router;

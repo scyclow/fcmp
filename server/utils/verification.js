@@ -23,7 +23,8 @@ function validatePassword(user, _password) {
 
 function signJWT(user) {
   return new Promise((resolve, reject) => {
-    jwt.sign(user, SECRET, {}, (err, token) => {
+    const { accountCode } = user;
+    jwt.sign({ accountCode }, SECRET, {}, (err, token) => {
       if (err) reject(new Error('JWT not created'));
       else resolve(token);
     });

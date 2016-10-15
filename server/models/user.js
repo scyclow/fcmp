@@ -24,7 +24,8 @@ const UserSchema = new Schema({
   accountCode: {
     type: String,
     default: createAccountCode,
-    unique: true
+    unique: true,
+    index: true
   },
   fastCashBalance: {
     type: Number,
@@ -83,11 +84,14 @@ UserSchema.statics = {
   },
 
   findByToken(decoded) {
-    const _id = decoded._doc._id;
-    return this.findOne({ _id }).then(user => {
-      if (!user) throw new Error(`User ${_id} no longer exists.`);
+    return this.findOne(decoded._doc).then(user => {
+      if (!user) throw new Error(`User no longer exists: ${decoded._doc}`);
       else return user;
     })
+  },
+
+  findByAccountCode(accountCode) {
+    return this.findOne({ accountCode });
   }
 }
 
