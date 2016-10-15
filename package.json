@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
+    "debug": "node --inspect index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dummyData": "node ./scripts/createDummyData.js",
     "production": "npm install && NODE_ENV=production node index.js"

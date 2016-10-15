@@ -3,7 +3,10 @@ const config = require('./env');
 
 mongoose.Promise = global.Promise;
 
-module.exports = () => mongoose.connect(process.env.MONGODB_URI || config.MONGODB_URI, (err) => {
-  if (err) console.error(`Error connecting to mongo: ${err}`);
-  else console.log('Mongo connection established');
+module.exports = new Promise((resolve, reject) => {
+  mongoose.connect(process.env.MONGODB_URI || config.MONGODB_URI, (err) => {
+    if (err) return reject(new Error(`Error connecting to mongo: ${err}`));
+    console.log('Mongo connection established');
+    resolve();
+  });
 });
