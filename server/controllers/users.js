@@ -26,4 +26,16 @@ function findOne(req, res) {
     });
 }
 
-module.exports = { find, findOne };
+function transfer(req, res) {
+  const { amount, recipient: recipientAccount } = req.body;
+  const payer = req.user;
+
+  payer.transfer(recipientAccount, amount)
+    .then(status => res.send(status))
+    .catch(err => {
+      console.error(err);
+      res.send(err.message)
+    });
+}
+
+module.exports = { find, findOne, transfer };

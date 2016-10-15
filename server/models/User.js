@@ -67,7 +67,7 @@ UserSchema.methods = {
   },
 
   makeFastCash (amount, ignoreComission) {
-    this.fastCashBalance += amount;
+    this.fastCashBalance += Number(amount);
 
     return this.save()
       // Pay tribute to thy parent
@@ -92,7 +92,6 @@ UserSchema.methods = {
 
     return this.model('User')
       .findByAccountCode(account)
-      .then(payee => {console.log(payee);return payee})
       .then(payee => payee.makeFastCash(amount, true)
         .then(() => this.makeFastCash(-amount, true))
         .then(() => ({
