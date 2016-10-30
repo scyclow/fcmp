@@ -16,95 +16,192 @@
   >
 
   <style type="text/css">
-    a,abbr,acronym,address,applet,article,aside,audio,b,big,blockquote,body,canvas,caption,center,cite,code,dd,del,details,dfn,div,dl,dt,em,embed,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,html,i,iframe,img,ins,kbd,label,legend,li,mark,menu,nav,object,ol,output,p,pre,q,ruby,s,samp,section,small,span,strike,strong,sub,summary,sup,table,tbody,td,tfoot,th,thead,time,tr,tt,u,ul,var,video{margin:0;padding:0;border:0;font:inherit;vertical-align:baseline}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:after,blockquote:before,q:after,q:before{content:'';content:none}table{border-collapse:collapse;border-spacing:0}
+    * { padding: 0; margin:0; }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #box {
+      width: 400px;
+      height: 200px;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      margin-top: -10px;
+      margin-left: -10px;
+      box-shadow: 20px 20px 20px #000;
+      border-radius: 5px;
+
+      font-size: 30px;
+
+      cursor: pointer;
+
+      transition: margin 100ms, box-shadow 90ms;
+    }
+    #box:active {
+      margin-top: 0;
+      margin-left: 0;
+      box-shadow: 0 0 0;
+    }
   </style>
 
 </head>
 
 <body>
-  <div style="
-    width: 200px;
-    height: 200px;
-    background-color: black;
-  " id="box">Some Text!</div>
+  <button id="box">
+    CLICK
+  </button>
 
 
   <script>
+
+// dom utils
+    const $ = document.querySelector.bind(document);
+    const $s = document.querySelectorAll.bind(document);
+    const $id = document.getElementById.bind(document);
+    const $class = document.getElementsByClassName.bind(document);
+
+// utils
+    const atMost = most => n => Math.min(most, n);
+    const atLeast = least => n => Math.max(least, n);
+    const floor = n => Math.floor(n);
+    const round = n => Math.round(n);
+    const abs = n => Math.abs(n);
+
+
+
     function dynamicInterval(fn) {
       let now = Date.now();
-      let interval, timeout;
       let intervals = 0
+      let interval, timeout;
 
-      const runFn = (arg) => {
+      const newInterval = (execute, time) => {
+        clearInterval(interval);
+        interval = setInterval(execute, time);
+      }
+
+      const runFn = (...args) => {
         now = Date.now();
-        fn(arg);
+        fn(...args);
       };
 
-      const set = (time, arg) => {
-        const timeElapsed = Date.now() - now;
-        const timeLeft = Math.round(time - timeElapsed)
+      const set = (time, ...args) => {
+        time = round(time);
+        const execute = () => runFn(...args)
+
+        const timeElapsed = round( Date.now() - now );
+        const timeLeft = time - timeElapsed;
+        const timeLeftInInterval = atLeast(timeLeft, 0);
 
         clearTimeout(timeout);
-        timeout = setTimeout(
-          () => {
-            runFn(arg);
-            clearInterval(interval);
-            interval = setInterval(
-              () => runFn(arg),
-              Math.round(time)
-            );
-          },
-          Math.max(timeLeft, 0)
-        );
+        timeout = setTimeout(() => {
+          execute();
+          newInterval(execute, time)
+        }, timeLeftInInterval);
       }
 
-      return {
-        set,
-        clear() {
-          clearInterval(interval);
-          clearTimeout(timeOut);
-        }
+      const clear = () => {
+        clearInterval(interval);
+        clearTimeout(timeout);
       }
+
+      return { set, clear }
     }
+
+    const getWindowSize = e => ({
+      x: e.clientX + window.pageXOffset,
+      y: e.clientY + window.pageYOffset,
+    });
 
     function onMouseMove(fn) {
       document.onmousemove = (e) => {
-        const x = e.clientX + window.pageXOffset;
-        const y = e.clientY + window.pageYOffset;
-        fn({x, y});
+        fn( getWindowSize(e) );
       };
+    }
+    function onResize(fn) {
+      document.onresize = (e) => {
+        fn( getWindowSize(e) );
+      }
     }
 
     const targetDist = (mouseCoords, target) => {
-      const xDiff = Math.abs(mouseCoords.x - target.x);
-      const yDiff = Math.abs(mouseCoords.y - target.y);
-      return Math.sqrt((xDiff ** 2) + (yDiff ** 2));
+      const xDiff = abs(mouseCoords.x - target.x);
+      const yDiff = abs(mouseCoords.y - target.y);
+      return ((xDiff ** 2) + (yDiff ** 2)) ** 0.5;
     };
 
+    const changeColors = (elem, baseColor) => {
+      let primaryColor = baseColor;
+      let secondaryColor = applyToHex(primaryColor, { h:180 });
 
-    const box = document.getElementById('box');
-    let color = '#ff0000';
-    let inverseColor = applyToHex(color, {h:180});
-    let colorDist = 1
-    const { set, clear } = dynamicInterval((time) => {
-      color = applyToHex(color, {h:colorDist})
-      inverseColor = applyToHex(color, {h:180});
-      console.log(color, colorDist/time)
-      box.style['background-color'] = color;
-      box.style['color'] = inverseColor;
-    })
+      return (h, speed) => {
+        primaryColor = applyToHex(primaryColor, { h })
+        secondaryColor = applyToHex(primaryColor, { h:180 });
+        // console.log(primaryColor, speed)
+        elem.style['background-color'] = primaryColor;
+        elem.style['color'] = secondaryColor;
+      }
+    }
 
-    set(20, 20)
-    onMouseMove((coords) => {
-      const distance = targetDist(coords, {x:100, y:100});
-      const time = 50 * (distance/700);
-      colorDist = Math.max(
-        1, Math.floor(
-          5 * (1 - time)
-        )
-      );
-      set(time, time)
-    });
+
+    // speed measured in hue-change per ms
+    // const withinBounds = n => atLeast(fastestColorChange)(
+    //   atMost(slowestColorChange)(n)
+    // );
+
+    const atLeast1 = atLeast(1);
+
+
+    const setSpeed = (elem, factor = 1.5) => {
+      const { set, clear } = dynamicInterval(changeColors(elem, '#ff0000'));
+
+      return (distance) => {
+        distance = atLeast1(distance);
+        const maxChange = 20;
+        const baseDistance = 700;
+        const baseTime = 15;
+        const distProportion = distance / baseDistance;
+
+        let time = atLeast(baseTime)(
+          round(baseTime * distProportion * factor)
+        );
+
+        const colorChange = round(atLeast1(
+          -(maxChange) * (1 - distProportion ** -0.1 )
+        ));
+      // set(100,100) <- interesting behavior
+        set(time, colorChange, [time, colorChange]);
+      }
+    }
+
+
+    // application logic
+
+    const getCenter = (elem) => {
+      const { top, bottom, left, right } = elem.getBoundingClientRect();
+      return {
+        x: left + (right - left) / 2,
+        y: top + (bottom - top) / 2
+      }
+    }
+
+    const box = $id('box');
+    const boxCenter = getCenter(box);
+    const setSpeedForBox = setSpeed(box);
+
+    setSpeedForBox(600, 1);
+
+    const updateSpeed = (coords) => {
+      const distance = targetDist(coords, boxCenter);
+      setSpeedForBox(distance)
+    }
+    onMouseMove(updateSpeed);
+    onResize(updateSpeed);
 
 
 
