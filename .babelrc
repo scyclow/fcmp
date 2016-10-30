@@ -1,0 +1,9 @@
+
+{
+  "plugins": [
+    "transform-flow-strip-types",
+    "transform-async-to-generator",
+    "transform-exponentiation-operator",
+    "transform-object-rest-spread"
+  ]
+}

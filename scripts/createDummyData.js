@@ -2,7 +2,6 @@ const createDummyData = require('./dummyData');
 const _ = require('lodash');
 const { ObjectId } = require('mongoose').Types;
 
-
 // PARENT TREE
 // Steve
 //   Mike
@@ -26,14 +25,13 @@ const userData = [
   { name: 'amanda', parent: 'brian' },
   { name: 'alex', parent: 'amanda' }
 ]
-.map(user => _.extend(user, { _id: new ObjectId() }))
+.map(user => ({ ...user, _id: new ObjectId() }))
 .map((user, i, users) => {
-  const parentName = user.parent;
-  const parent = _.find(users, { name: parentName });
-  user.parent = parent && parent._id;
-  return user;
+  const parent = _.find(users, { name: user.parent });
+  return { ...user, parent: parent && parent._id };
 })
-.map(user => _.extend(user, {
+.map(user => ({
+  ...user,
   email: `${user.name}@fast.plus`,
   username: _.capitalize(user.name),
   password: '1234'

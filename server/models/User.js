@@ -66,14 +66,25 @@ UserSchema.methods = {
     return validatePassword(this, password);
   },
 
-  makeFastCash (amount, ignoreComission) {
-    this.fastCashBalance += Number(amount);
+  async makeFastCash (amount, ignoreComission) {
+    const updateBalance = async () => {
+      this.fastCashBalance += Number(amount);
+      return this.save();
+    };
 
-    return this.save()
-      // Pay tribute to thy parent
-      .then(() => !ignoreComission && this.getParent())
-      .then(parent => parent && parent.makeFastCash(amount * this.parentBonus))
-      .then(() => this);
+    const updateParent = async () => {
+      if (!ignoreComission) {
+        const parent = await this.getParent();
+        if (parent) return parent.makeFastCash(amount * this.parentBonus);
+      }
+    };
+
+    await Promise.all([
+      updateBalance(),
+      updateParent()
+    ]);
+
+    return this;
   },
 
   getParent () {
@@ -85,40 +96,41 @@ UserSchema.methods = {
     return populate ? query : query.select('_id');
   },
 
-  transfer(account, amount) {
-    if (this.fastCashBalance < amount) return Promise.reject(new Error(
+  async transfer(account, amount) {
+    if (this.fastCashBalance < amount) throw new Error(
       `${this.username} does not have enough fastcash for this tansaction`
-    ));
+    );
 
-    return this.model('User')
-      .findByAccountCode(account)
-      .then(payee => payee.makeFastCash(amount, true)
-        .then(() => this.makeFastCash(-amount, true))
-        .then(() => ({
-          payer: _.pick(this, ['username', 'fastCashBalance']),
-          payee: _.pick(payee, ['username', 'fastCashBalance']),
-        }))
-      );
+    const payee = await this.model('User').findByAccountCode(account);
+
+    await Promise.all([
+      payee.makeFastCash(amount, true),
+      this.makeFastCash(-amount, true)
+    ]);
+
+    return {
+      payer: _.pick(this, ['username', 'fastCashBalance']),
+      payee: _.pick(payee, ['username', 'fastCashBalance']),
+    };
   }
 };
 
 UserSchema.statics = {
-  validateUser(identifier, password) {
-    return this.findOne(identifier).then(user => {
-      if (!user) throw new Error(`User with ${JSON.stringify(identifier)} does not exist.`);
+  async validateUser(identifier, password) {
+    const user = await this.findOne(identifier);
+    if (!user) throw new Error(`User with ${JSON.stringify(identifier)} does not exist.`);
 
-      return user.passwordValid(password).then(isValid => {
-        if (!isValid) throw new Error('Password is invalid.');
-        return user;
-      });
-    });
+    const isValid = await user.passwordValid(password);
+    if (!isValid) throw new Error('Password is invalid.');
+
+    return user;
   },
 
-  findByToken(decoded) {
-    return this.findOne(decoded._doc).then(user => {
-      if (!user) throw new Error(`User no longer exists: ${decoded._doc}`);
-      else return user;
-    })
+  async findByToken(decoded) {
+    const user = await this.findOne(decoded._doc);
+    if (!user) throw new Error(`User does not exist: ${decoded._doc}`);
+
+    return user;
   },
 
   findByAccountCode(accountCode) {
