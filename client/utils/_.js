@@ -65,7 +65,9 @@ function *timeGen(t=Infinity, fn=identity) {
 }
 
 function times(t, fn = identity) {
-  return [...timeGen(t)].map(fn);
+  let output = [];
+  for (let i of timeGen(t)) output.push(fn(i));
+  return output;
 }
 
 function compact(arr) {
