@@ -13,6 +13,11 @@ require('./server/routes')(app);
 const port = config.PORT;
 const env = process.env.NODE_ENV || 'development';
 
+if (env === 'development') {
+  require('pretty-error').start();
+  require('./client/devServer');
+}
+
 const startServer = () => app.listen(port, (err) => {
   if (err) throw new Error(`Something went wrong with express: ${err}`);
 

@@ -4,7 +4,7 @@
   "description": "The hottest fastcashmoney site on the web",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js",
+    "start": "nodemon index.js --ignore ./client",
     "debug": "node --inspect index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --config client/build/webpack.dev.config.js",
@@ -53,6 +53,8 @@
     "flow-bin": "^0.34.0",
     "html-webpack-plugin": "^2.24.1",
     "nodemon": "^1.10.2",
-    "webpack": "^2.1.0-beta.25"
+    "pretty-error": "^2.0.2",
+    "webpack": "^1.13.3",
+    "webpack-dev-middleware": "^1.8.4"
   }
 }

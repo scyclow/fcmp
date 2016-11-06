@@ -5,7 +5,6 @@ const webpack = require('webpack');
 const html = (params) => new (require('html-webpack-plugin'))(params);
 const rootDir = (...paths) => path.join(__dirname, '../..', ...paths);
 
-console.log(__dirname)
 module.exports = {
   context: rootDir('client'),
   entry: {
@@ -22,12 +21,10 @@ module.exports = {
     })
   ],
   module: {
-    rules: [{
+    loaders: [{
       test: /\.js$/,
-      use: [{
-        loader: 'babel-loader',
-        options: { plugins: ['transform-exponentiation-operator'] }
-      }]
+      exclude: /node_modules/,
+      loaders: ['babel']
     }]
   }
 };
