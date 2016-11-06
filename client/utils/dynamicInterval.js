@@ -1,6 +1,8 @@
+// @flow
+
 'use strict';
 
-const { round } = require('./_');
+const _ = require('./_');
 
 function dynamicInterval(fn) {
   let now = Date.now();
@@ -18,12 +20,12 @@ function dynamicInterval(fn) {
   };
 
   const set = (time, ...args) => {
-    time = round(time);
+    time = _.round(time);
     const execute = () => runFn(...args)
 
-    const timeElapsed = round( Date.now() - now );
+    const timeElapsed = _.round( Date.now() - now );
     const timeLeft = time - timeElapsed;
-    const timeLeftInInterval = atLeast(timeLeft, 0);
+    const timeLeftInInterval = _.atLeast(timeLeft, 0);
 
     clearTimeout(timeout);
     timeout = setTimeout(() => {

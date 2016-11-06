@@ -1,4 +1,4 @@
-import { between } from './misc';
+const { between } = require('./_');
 
 function numToHex(num) {
   let hex = Math.round( Math.min(num, 255) ).toString(16);

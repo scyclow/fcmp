@@ -103,6 +103,12 @@ function compose(...fnArr) {
   return (...args) => fnArr.slice(1).reduce((acc, fn) => fn(acc), fnArr[0](...args));
 }
 
+function distance(a, b) {
+  const xDiff = abs(a.x - b.x);
+  const yDiff = abs(a.y - b.y);
+  return ((xDiff ** 2) + (yDiff ** 2)) ** 0.5;
+}
+
 module.exports = {
   between,
   betweenLinear,
@@ -124,5 +130,6 @@ module.exports = {
   compact,
   enumerate,
   find,
-  compose
+  compose,
+  distance
 };
