@@ -5,6 +5,31 @@ const round = Math.round.bind(Math);
 const abs = Math.abs.bind(Math);
 const max = Math.max.bind(Math);
 const min = Math.min.bind(Math);
+
+const toRadian = (degree) => degree * (Math.PI / 180);
+const toDegree = (radian) => (radian * 180) / Math.PI;
+
+const sin = (deg) => Math.sin(toRadian(deg));
+const cos = (deg) => Math.cos(toRadian(deg));
+const tan = (deg) => Math.tan(toRadian(deg));
+const asin = (ratio) => toDegree(Math.asin(ratio));
+const acos = (ratio) => toDegree(Math.acos(ratio));
+const atan = (ratio) => toDegree(Math.atan(ratio));
+
+const degreeAroundCenter = (coords, center) => {
+  const x = center.x - coords.x;
+  const y = center.y - coords.y;
+
+  const rawDeg = atan(y / x);
+
+  return (
+    x < 0 ? 180 + rawDeg :
+    y < 0 ? 360 + rawDeg :
+    rawDeg
+  );
+}
+
+
 const atMost = most => n => min(most, n);
 const atLeast = least => n => max(least, n);
 const isArray = Array.isArray.bind(Array);
@@ -131,5 +156,15 @@ module.exports = {
   enumerate,
   find,
   compose,
-  distance
+  distance,
+
+  sin,
+  cos,
+  tan,
+  asin,
+  acos,
+  atan,
+  toRadian,
+  toDegree,
+  degreeAroundCenter
 };

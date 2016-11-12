@@ -6,31 +6,31 @@ const colors = require('./colors');
 const dynamicInterval = require('./dynamicInterval');
 const atLeast1 = _.atLeast(1);
 
-const flipColor = (c) => colors.applyToHex(c, { h: 180 });
-
+const polarize = (c) => colors.applyToHex(c, { h: 180 });
+const updateHue = (c, h) => colors.applyToHex(c, { h });
 
 const changeColors = (elem, baseColor) => {
   let primaryColor = baseColor;
-  let secondaryColor = flipColor(primaryColor);
+  let secondaryColor = polarize(primaryColor);
 
   return (h, speed) => {
-    primaryColor = colors.applyToHex(primaryColor, { h })
-    secondaryColor = flipColor(primaryColor);
+    primaryColor = updateHue(primaryColor, h)
+    secondaryColor = polarize(primaryColor);
 
-    // console.log(primaryColor, speed)
     $(elem, 'background-color', primaryColor);
     $(elem, 'color', secondaryColor);
   }
 }
+
+const maxChange = 20;
+const baseDistance = 700;
+const baseTime = 15;
 
 function setColorSpeedForElement (elem, color, factor = 1.5) {
   const { set, clear } = dynamicInterval(changeColors(elem, color));
 
   return (rawDistance) => {
     const distance = atLeast1(rawDistance);
-    const maxChange = 20;
-    const baseDistance = 700;
-    const baseTime = 15;
     const distProportion = distance / baseDistance;
 
     let time = _.atLeast(baseTime)(
@@ -40,21 +40,26 @@ function setColorSpeedForElement (elem, color, factor = 1.5) {
     const colorChange = _.round(atLeast1(
       -(maxChange) * (1 - distProportion ** -0.1 )
     ));
-  // set(100,100) <- interesting behavior
+  // set(100,100) //<- interesting behavior
     set(time, colorChange, [time, colorChange]);
   }
 }
 
 function updateColorDistance(elem, baseColor, baseSpeed) {
-  const elemCenterCache = $.getCenterOfElement(elem);
+  let elemCenter = $.center(elem);
   const setSpeed = setColorSpeedForElement(elem, '#ff0000');
   setSpeed(baseSpeed.distance, baseSpeed.time);
 
-  return (ignoreCenterCache) => (event) => {
-    const center = ignoreCenterCache ? $.getCenterOfElement(elem) : elemCenterCache;
-    const coords = $.eventDimensions(event);
-    const distance = _.distance(coords, center);
-    setSpeed(distance);
+  return {
+    updateSpeed(event) {
+      const coords = $.eventDimensions(event);
+      const distance = _.distance(coords, elemCenter);
+      setSpeed(distance);
+    },
+
+    updateCenter() {
+      elemCenter = $.center(elem)
+    }
   }
 }
 

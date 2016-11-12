@@ -18,17 +18,23 @@ const eventListener = (eventType) => (fn, element = document) => {
   return clear;
 }
 
-
-$.onMouseMove = eventListener('mousemove')
+$.onMouseMove = eventListener('mousemove');
+$.onHover = eventListener('mouseover');
 
 $.onResize = eventListener('resize');
 
-$.getCenterOfElement = (elem) => {
+$.center = $.getCenterOfElement = (elem) => {
   const { top, bottom, left, right } = elem.getBoundingClientRect();
   return {
     x: left + (right - left) / 2,
     y: top + (bottom - top) / 2
   }
+}
+
+$.coordsEvent = (fn) => (event) => {
+  const coords = $.eventDimensions(event);
+  const { x, y } = coords;
+  return fn({ coords, event, x, y });
 }
 
 module.exports = $;
