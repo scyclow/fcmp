@@ -51,8 +51,7 @@ function updateColorDistance(elem, baseColor, baseSpeed) {
   setSpeed(baseSpeed.distance, baseSpeed.time);
 
   return {
-    updateSpeed(event) {
-      const coords = $.eventDimensions(event);
+    updateSpeed({coords}) {
       const distance = _.distance(coords, elemCenter);
       setSpeed(distance);
     },

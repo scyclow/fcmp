@@ -20,6 +20,7 @@ const eventListener = (eventType) => (fn, element = document) => {
 
 $.onMouseMove = eventListener('mousemove');
 $.onHover = eventListener('mouseover');
+$.onOrient = eventListener('deviceorientation');
 
 $.onResize = eventListener('resize');
 
@@ -35,6 +36,11 @@ $.coordsEvent = (fn) => (event) => {
   const coords = $.eventDimensions(event);
   const { x, y } = coords;
   return fn({ coords, event, x, y });
+}
+
+$.orientEvent = (fn) => (event) => {
+  const { beta, gamma, absolute, alpha } = event;
+  fn({ beta, gamma, absolute, alpha, event })
 }
 
 module.exports = $;
