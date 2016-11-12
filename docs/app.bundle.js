@@ -61,7 +61,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 4);
+/******/ 	return __webpack_require__(__webpack_require__.s = 5);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -76,6 +76,26 @@ const round = Math.round.bind(Math);
 const abs = Math.abs.bind(Math);
 const max = Math.max.bind(Math);
 const min = Math.min.bind(Math);
+
+const toRadian = degree => degree * (Math.PI / 180);
+const toDegree = radian => radian * 180 / Math.PI;
+
+const sin = deg => Math.sin(toRadian(deg));
+const cos = deg => Math.cos(toRadian(deg));
+const tan = deg => Math.tan(toRadian(deg));
+const asin = ratio => toDegree(Math.asin(ratio));
+const acos = ratio => toDegree(Math.acos(ratio));
+const atan = ratio => toDegree(Math.atan(ratio));
+
+const degreeAroundCenter = (coords, center) => {
+  const x = center.x - coords.x;
+  const y = center.y - coords.y;
+
+  const rawDeg = atan(y / x);
+
+  return x < 0 ? 180 + rawDeg : y < 0 ? 360 + rawDeg : rawDeg;
+};
+
 const atMost = most => n => min(most, n);
 const atLeast = least => n => max(least, n);
 const isArray = Array.isArray.bind(Array);
@@ -195,18 +215,29 @@ module.exports = {
   enumerate,
   find,
   compose,
-  distance
+  distance,
+
+  sin,
+  cos,
+  tan,
+  asin,
+  acos,
+  atan,
+  toRadian,
+  toDegree,
+  degreeAroundCenter
 };
 
 /***/ },
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
+
 const _ = __webpack_require__(0);
 
-const $ = (...args) => document.querySelector(...args);
+$ = (elem, prop, value) => elem.style[prop] = value;
 
-$.s = document.querySelectorAll.bind(document);
+$.qsa = document.querySelectorAll.bind(document);
 $.id = document.getElementById.bind(document);
 $.class = document.getElementsByClassName.bind(document);
 
@@ -222,14 +253,28 @@ const eventListener = eventType => (fn, element = document) => {
 };
 
 $.onMouseMove = eventListener('mousemove');
+$.onHover = eventListener('mouseover');
+$.onOrient = eventListener('deviceorientation');
+
 $.onResize = eventListener('resize');
 
-$.getCenterOfElement = elem => {
+$.center = $.getCenterOfElement = elem => {
   const { top, bottom, left, right } = elem.getBoundingClientRect();
   return {
     x: left + (right - left) / 2,
     y: top + (bottom - top) / 2
   };
+};
+
+$.coordsEvent = fn => event => {
+  const coords = $.eventDimensions(event);
+  const { x, y } = coords;
+  return fn({ coords, event, x, y });
+};
+
+$.orientEvent = fn => event => {
+  const { beta, gamma, absolute, alpha } = event;
+  fn({ beta, gamma, absolute, alpha, event });
 };
 
 module.exports = $;
@@ -379,6 +424,73 @@ module.exports = {
 "use strict";
 'use strict';
 
+const $ = __webpack_require__(1);
+const _ = __webpack_require__(0);
+const colors = __webpack_require__(2);
+const dynamicInterval = __webpack_require__(4);
+const atLeast1 = _.atLeast(1);
+
+const polarize = c => colors.applyToHex(c, { h: 180 });
+const updateHue = (c, h) => colors.applyToHex(c, { h });
+
+const changeColors = (elem, baseColor) => {
+  let primaryColor = baseColor;
+  let secondaryColor = polarize(primaryColor);
+
+  return (h, speed) => {
+    primaryColor = updateHue(primaryColor, h);
+    secondaryColor = polarize(primaryColor);
+
+    $(elem, 'background-color', primaryColor);
+    $(elem, 'color', secondaryColor);
+  };
+};
+
+const maxChange = 20;
+const baseDistance = 700;
+const baseTime = 15;
+
+function setColorSpeedForElement(elem, color, factor = 1.5) {
+  const { set, clear } = dynamicInterval(changeColors(elem, color));
+
+  return rawDistance => {
+    const distance = atLeast1(rawDistance);
+    const distProportion = distance / baseDistance;
+
+    let time = _.atLeast(baseTime)(_.round(baseTime * distProportion * factor));
+
+    const colorChange = _.round(atLeast1(-maxChange * (1 - Math.pow(distProportion, -0.1))));
+    // set(100,100) //<- interesting behavior
+    set(time, colorChange, [time, colorChange]);
+  };
+}
+
+function updateColorDistance(elem, baseColor, baseSpeed) {
+  let elemCenter = $.center(elem);
+  const setSpeed = setColorSpeedForElement(elem, '#ff0000');
+  setSpeed(baseSpeed.distance, baseSpeed.time);
+
+  return {
+    updateSpeed({ coords }) {
+      const distance = _.distance(coords, elemCenter);
+      setSpeed(distance);
+    },
+
+    updateCenter() {
+      elemCenter = $.center(elem);
+    }
+  };
+}
+
+module.exports = updateColorDistance;
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+'use strict';
+
 const _ = __webpack_require__(0);
 
 function dynamicInterval(fn) {
@@ -422,63 +534,55 @@ function dynamicInterval(fn) {
 module.exports = dynamicInterval;
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+'use strict';
 
 const $ = __webpack_require__(1);
 const _ = __webpack_require__(0);
-const colors = __webpack_require__(2);
-const dynamicInterval = __webpack_require__(3);
-const atLeast1 = _.atLeast(1);
-
-const changeColors = (elem, baseColor) => {
-  let primaryColor = baseColor;
-  let secondaryColor = colors.applyToHex(primaryColor, { h: 180 });
-
-  return (h, speed) => {
-    primaryColor = colors.applyToHex(primaryColor, { h });
-    secondaryColor = colors.applyToHex(primaryColor, { h: 180 });
-    // console.log(primaryColor, speed)
-    elem.style['background-color'] = primaryColor;
-    elem.style['color'] = secondaryColor;
-  };
-};
-
-function setSpeed(elem, factor = 1.5) {
-  const { set, clear } = dynamicInterval(changeColors(elem, '#ff0000'));
-
-  return rawDistance => {
-    const distance = atLeast1(rawDistance);
-    const maxChange = 20;
-    const baseDistance = 700;
-    const baseTime = 15;
-    const distProportion = distance / baseDistance;
-
-    let time = _.atLeast(baseTime)(_.round(baseTime * distProportion * factor));
-
-    const colorChange = _.round(atLeast1(-maxChange * (1 - Math.pow(distProportion, -0.1))));
-    // set(100,100) <- interesting behavior
-    set(time, colorChange, [time, colorChange]);
-  };
-}
+const c = __webpack_require__(2);
+const updateColorDistance = __webpack_require__(3);
 
 const box = $.id('box');
-const setSpeedForBox = setSpeed(box);
-setSpeedForBox(600, 1);
+const baseSpeed = { distance: 600, time: 1 };
+const { updateSpeed, updateCenter } = updateColorDistance(box, '#ff0000', baseSpeed);
+const baseShadowRadius = 20;
 
-const boxCenterCache = $.getCenterOfElement(box);
-
-const updateSpeed = ignoreCenterCache => event => {
-  const center = ignoreCenterCache ? $.getCenterOfElement(box) : boxCenterCache;
-  if (ignoreCenterCache) console.log(center)
-
-  const coords = $.eventDimensions(event);
+const updateBoxShadow = ({ coords }) => {
+  const center = $.center(box);
   const distance = _.distance(coords, center);
-  setSpeedForBox(distance);
+  const degree = _.degreeAroundCenter(coords, center);
+
+  const shadowColor = c.applyToHex('#500', {
+    h: _.round(degree),
+    v: _.atMost(0.5)(distance / 800)
+  });
+
+  const shadowRadius = baseShadowRadius * (distance / 350) + baseShadowRadius;
+  const x = shadowRadius * _.sin(degree);
+  const y = shadowRadius * _.cos(degree);
+
+  $(box, 'box-shadow', `${ y }px ${ x }px 20px ${ shadowColor }`);
 };
 
-$.onMouseMove(updateSpeed(false));
-$.onResize(updateSpeed(true));
+// $.onMouseMove($.coordsEvent(updateSpeed));
+$.onMouseMove($.coordsEvent(updateBoxShadow));
+$.onOrient($.orientEvent(({ beta, gamma, absolute, alpha }) => {
+  console.log({ beta, gamma, absolute, alpha });
+
+  const coords = {
+    x: (gamma < 0 ? 90 + gamma : 90 - gamma) / 9,
+    y: 90 - beta
+  };
+  // beta -- forward backward tilt. 0 when flat on back, negative when backwards, converges at +/- 180 when flat upside down
+  // alpha -- direction. roughly 360/0 when facing north
+  // gamma -- side to side tilt. 0 when flat on either side. negative when left, postive when right (facing both sides), converges at 90
+  updateBoxShadow({ coords });
+}));
+
+$.onResize(updateCenter);
 
 /***/ }
 /******/ ]);
