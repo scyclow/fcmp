@@ -21,10 +21,13 @@ module.exports = {
     })
   ],
   module: {
-    loaders: [{
+    rules: [{
       test: /\.js$/,
       exclude: /node_modules/,
-      loaders: ['babel']
+      use: [{
+        loader: 'babel-loader',
+        options: { plugins: ['transform-exponentiation-operator'] }
+      }]
     }]
   }
 };

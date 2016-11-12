@@ -54,7 +54,7 @@
     "html-webpack-plugin": "^2.24.1",
     "nodemon": "^1.10.2",
     "pretty-error": "^2.0.2",
-    "webpack": "^1.13.3",
-    "webpack-dev-server": "^1.16.2"
+    "webpack": "^2.1.0-beta.25",
+    "webpack-dev-server": "^2.1.0-beta.9"
   }
 }
