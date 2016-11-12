@@ -1,8 +1,9 @@
+
 const _ = require('./_');
 
-const $ = (...args) => document.querySelector(...args);
+$ = (elem, prop, value) => elem.style[prop] = value;
 
-$.s = document.querySelectorAll.bind(document);
+$.qsa = document.querySelectorAll.bind(document);
 $.id = document.getElementById.bind(document);
 $.class = document.getElementsByClassName.bind(document);
 
@@ -17,7 +18,9 @@ const eventListener = (eventType) => (fn, element = document) => {
   return clear;
 }
 
-$.onMouseMove = eventListener('mousemove');
+
+$.onMouseMove = eventListener('mousemove')
+
 $.onResize = eventListener('resize');
 
 $.getCenterOfElement = (elem) => {

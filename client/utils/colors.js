@@ -59,7 +59,7 @@ function rgbToHsv({r, g, b}) {
   };
 }
 
-function hsvToRgb({h, s, v}) {
+function hsvToRgb({ h, s, v }) {
   h /= 60;
   const c = v * s;
   const x = c * (1 - Math.abs(h % 2 - 1));
