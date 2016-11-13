@@ -13,7 +13,7 @@ const changeColors = (elem, baseColor) => {
   let primaryColor = baseColor;
   let secondaryColor = polarize(primaryColor);
 
-  return (h, speed) => {
+  return (h) => {
     primaryColor = updateHue(primaryColor, h)
     secondaryColor = polarize(primaryColor);
 
@@ -26,8 +26,8 @@ const maxChange = 20;
 const baseDistance = 700;
 const baseTime = 15;
 
-function setColorSpeedForElement (elem, color, factor = 1.5) {
-  const { set, clear } = dynamicInterval(changeColors(elem, color));
+function createSpeedSetter (elem, baseColor, factor = 1.5) {
+  const { set, clear } = dynamicInterval(changeColors(elem, baseColor));
 
   return (rawDistance) => {
     const distance = atLeast1(rawDistance);
@@ -45,9 +45,10 @@ function setColorSpeedForElement (elem, color, factor = 1.5) {
   }
 }
 
+// create interface to update color speed and element center
 function updateColorDistance(elem, baseColor, baseSpeed) {
   let elemCenter = $.center(elem);
-  const setSpeed = setColorSpeedForElement(elem, '#ff0000');
+  const setSpeed = createSpeedSetter(elem, '#ff0000');
   setSpeed(baseSpeed.distance, baseSpeed.time);
 
   return {

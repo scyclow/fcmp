@@ -4,25 +4,36 @@
 
 const _ = require('./_');
 
+/*
+  @fn : (setArgs) => void
+
+  // => {
+    set: (time, setArgs) => sets new interval for fn, calling it each time with setArgs
+    clear: () => clears interval
+  }
+*/
 function dynamicInterval(fn) {
   let now = Date.now();
   let intervals = 0
   let interval, timeout;
 
+  // clear old interval, create a new interval
   const newInterval = (execute, time) => {
     clearInterval(interval);
     interval = setInterval(execute, time);
   }
 
-  const runFn = (...args) => {
-    now = Date.now();
-    fn(...args);
-  };
-
-  const set = (time, ...args) => {
+  const set = (time, ...setArgs) => {
     time = _.round(time);
-    const execute = () => runFn(...args)
 
+    // execute fn with setArgs,
+    const execute = () => {
+      now = Date.now();
+      fn(...setArgs);
+    }
+
+    // find the amount of time already elapsed, deduct that from the new interval,
+    // and set the new interval in the-amount-of-time-left
     const timeElapsed = _.round( Date.now() - now );
     const timeLeft = time - timeElapsed;
     const timeLeftInInterval = _.atLeast(timeLeft, 0);
