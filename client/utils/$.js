@@ -40,7 +40,6 @@ $.coordsEvent = (fn) => (event) => {
 
 $.orientEvent = (fn) => (event) => {
   const { beta, gamma, absolute, alpha } = event;
-  console.log(event)
   fn({ beta, gamma, absolute, alpha, event })
 }
 

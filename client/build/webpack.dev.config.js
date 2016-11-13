@@ -28,6 +28,9 @@ module.exports = {
         loader: 'babel-loader',
         options: { plugins: ['transform-exponentiation-operator'] }
       }]
+    }, {
+      test: /\.css/,
+      use: ['style-loader', 'css-loader']
     }]
   }
 };

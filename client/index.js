@@ -1,4 +1,7 @@
 'use strict'
+
+require('./index.css')
+
 const $ = require('./utils/$');
 const _ = require('./utils/_');
 const c = require('./utils/colors');
@@ -23,15 +26,16 @@ const updateBoxShadow = ({ coords }) => {
   const x = shadowRadius * _.sin(degree);
   const y = shadowRadius * _.cos(degree);
 
+  console.log('+++++++++++++++++++', x, y, coords)
+
   $(
     box,
     'box-shadow',
-    `${y}px ${x}px 20px ${shadowColor}`
+    `${_.round(y)}px ${_.round(x)}px 20px ${shadowColor}`
   );
 };
 
 const clearOrient = $.onOrient($.orientEvent(({ beta, gamma, absolute, alpha}) => {
-  console.log({beta, gamma, absolute, alpha})
 
   const coords = {
     x: ((gamma < 0) ? (90 + gamma) : (90 - gamma)) / 9,

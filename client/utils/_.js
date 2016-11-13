@@ -43,8 +43,8 @@ function portion(high, middle) {
   return (high - middle) / high;
 }
 
-function identity(...args) {
-  return args.length > 0 ? args : args[0];
+function identity(arg) {
+  return arg;
 }
 
 function between(n, high, low) {

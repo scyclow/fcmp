@@ -50,10 +50,12 @@
     "babel-plugin-transform-flow-strip-types": "^6.14.0",
     "babel-plugin-transform-object-rest-spread": "^6.16.0",
     "babel-register": "^6.16.3",
+    "css-loader": "^0.25.0",
     "flow-bin": "^0.34.0",
     "html-webpack-plugin": "^2.24.1",
     "nodemon": "^1.10.2",
     "pretty-error": "^2.0.2",
+    "style-loader": "^0.13.1",
     "webpack": "^2.1.0-beta.25",
     "webpack-dev-server": "^2.1.0-beta.9"
   }
