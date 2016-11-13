@@ -11,6 +11,7 @@ const box = $.id('box');
 const baseSpeed = { distance: 600, time: 1 };
 const { updateSpeed, updateCenter } = updateColorDistance(box, '#ff0000', baseSpeed);
 const baseShadowRadius = 20;
+const orientAdjust = 10;
 
 const updateBoxShadow = ({ coords }) => {
   const center = $.center(box);
@@ -23,23 +24,23 @@ const updateBoxShadow = ({ coords }) => {
   });
 
   const shadowRadius = baseShadowRadius * (distance / 350) + baseShadowRadius;
-  const x = shadowRadius * _.sin(degree);
-  const y = shadowRadius * _.cos(degree);
+  const x = _.round(shadowRadius * _.sin(degree));
+  const y = _.round(shadowRadius * _.cos(degree));
 
-  console.log('+++++++++++++++++++', x, y, coords)
+  const boxShadowStyle = `${y}px ${x}px ${baseShadowRadius}px ${shadowColor}`;
 
-  $(
-    box,
-    'box-shadow',
-    `${_.round(y)}px ${_.round(x)}px 20px ${shadowColor}`
-  );
+  console.log(boxShadowStyle);
+
+  $(box, 'box-shadow', boxShadowStyle);
 };
 
-const clearOrient = $.onOrient($.orientEvent(({ beta, gamma, absolute, alpha}) => {
+
+const clearOrient =
+$.onOrient($.orientEvent(({ beta, gamma, absolute, alpha}) => {
 
   const coords = {
-    x: ((gamma < 0) ? (90 + gamma) : (90 - gamma)) / 9,
-    y: 90 - beta
+    x: ((gamma < 0) ? (90 + gamma) : (90 - gamma)) * orientAdjust,
+    y: (90 - beta) * orientAdjust
   };
   // beta -- forward backward tilt. 0 when flat on back, negative when backwards, converges at +/- 180 when flat upside down
   // alpha -- direction. roughly 360/0 when facing north
