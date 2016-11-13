@@ -254,7 +254,7 @@ const eventListener = eventType => (fn, element = document) => {
 
 $.onMouseMove = eventListener('mousemove');
 $.onHover = eventListener('mouseover');
-$.onOrient = eventListener('deviceorientation');
+$.onOrient = fn => eventListener('deviceorientation')(fn, window);
 
 $.onResize = eventListener('resize');
 
@@ -274,6 +274,7 @@ $.coordsEvent = fn => event => {
 
 $.orientEvent = fn => event => {
   const { beta, gamma, absolute, alpha } = event;
+  console.log(event);
   fn({ beta, gamma, absolute, alpha, event });
 };
 
@@ -567,9 +568,7 @@ const updateBoxShadow = ({ coords }) => {
   $(box, 'box-shadow', `${ y }px ${ x }px 20px ${ shadowColor }`);
 };
 
-// $.onMouseMove($.coordsEvent(updateSpeed));
-$.onMouseMove($.coordsEvent(updateBoxShadow));
-$.onOrient($.orientEvent(({ beta, gamma, absolute, alpha }) => {
+const clearOrient = $.onOrient($.orientEvent(({ beta, gamma, absolute, alpha }) => {
   console.log({ beta, gamma, absolute, alpha });
 
   const coords = {
@@ -581,6 +580,9 @@ $.onOrient($.orientEvent(({ beta, gamma, absolute, alpha }) => {
   // gamma -- side to side tilt. 0 when flat on either side. negative when left, postive when right (facing both sides), converges at 90
   updateBoxShadow({ coords });
 }));
+$.onMouseMove(clearOrient);
+$.onMouseMove($.coordsEvent(updateSpeed));
+$.onMouseMove($.coordsEvent(updateBoxShadow));
 
 $.onResize(updateCenter);
 
