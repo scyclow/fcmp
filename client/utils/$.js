@@ -20,7 +20,7 @@ const eventListener = (eventType) => (fn, element = document) => {
 
 $.onMouseMove = eventListener('mousemove');
 $.onHover = eventListener('mouseover');
-$.onOrient = eventListener('deviceorientation');
+$.onOrient = fn => eventListener('deviceorientation')(fn, window);
 
 $.onResize = eventListener('resize');
 
@@ -40,6 +40,7 @@ $.coordsEvent = (fn) => (event) => {
 
 $.orientEvent = (fn) => (event) => {
   const { beta, gamma, absolute, alpha } = event;
+  console.log(event)
   fn({ beta, gamma, absolute, alpha, event })
 }
 

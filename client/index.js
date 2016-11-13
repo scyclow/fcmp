@@ -30,9 +30,7 @@ const updateBoxShadow = ({ coords }) => {
   );
 };
 
-// $.onMouseMove($.coordsEvent(updateSpeed));
-$.onMouseMove($.coordsEvent(updateBoxShadow));
-$.onOrient($.orientEvent(({ beta, gamma, absolute, alpha}) => {
+const clearOrient = $.onOrient($.orientEvent(({ beta, gamma, absolute, alpha}) => {
   console.log({beta, gamma, absolute, alpha})
 
   const coords = {
@@ -44,5 +42,8 @@ $.onOrient($.orientEvent(({ beta, gamma, absolute, alpha}) => {
   // gamma -- side to side tilt. 0 when flat on either side. negative when left, postive when right (facing both sides), converges at 90
   updateBoxShadow({ coords })
 }));
+$.onMouseMove(clearOrient)
+$.onMouseMove($.coordsEvent(updateSpeed));
+$.onMouseMove($.coordsEvent(updateBoxShadow));
 
 $.onResize(updateCenter);
