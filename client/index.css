@@ -13,10 +13,6 @@
   height: 200px;
 
   display: inline-block;
-
-  margin-top: -10px;
-  margin-left: -10px;
-  box-shadow: 20px 20px 20px #000;
   border: 5px solid black;
   border-radius: 5px;
 
@@ -27,7 +23,7 @@
   transition: margin 100ms, box-shadow 90ms;
 }
 
-.inner-box {
+.box > * {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -35,8 +31,14 @@
   width: 100%;
 }
 
-#box:active {
-  margin-top: 0;
-  margin-left: 0;
+.shadow-change {
+/*  margin-top: -10px;
+  margin-left: -10px;*/
+  box-shadow: 20px 20px 20px #000;
+}
+
+.shadow-change:active {
+  margin-top: 10px;
+  margin-left: 10px;
   box-shadow: 0 0 0 !important;
 }

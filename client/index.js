@@ -11,7 +11,8 @@ window.IMPORTANT = {
   pause: false
 };
 
-const boxes = $.cls('box');
+const colorSwitches = $.cls('color-switch');
+const shadowChanges = $.cls('shadow-change');
 
 // const box = $.id('box');
 const baseSpeed = { distance: 600, time: 1 };
@@ -20,7 +21,7 @@ const baseSpeed = { distance: 600, time: 1 };
 //   updateColorSpeed,
 //   updateCenter
 // }]
-const updaters = boxes.map(box =>
+const updaters = colorSwitches.map(box =>
   updateColorSpeedDistance(box, '#ff0000', baseSpeed, {
     primary: ['background-color'],
     secondary: ['color']
@@ -50,7 +51,7 @@ const updateBoxShadow = box => ({ coords }) => {
 };
 
 
-const clearOrients = boxes.map(box =>
+const clearOrients = shadowChanges.map(box =>
   $.onOrient(
     $.orientEvent(({ beta, gamma, absolute, alpha }) => {
 
@@ -65,14 +66,13 @@ const clearOrients = boxes.map(box =>
       updateBoxShadow(box, { coords });
     })
   )
-)
+);
 
-
-$.onMouseMove(() => clearOrients.forEach(_.runFn))
+$.onMouseMove(() => clearOrients.forEach(_.runFn));
 $.onMouseMove((event) => updaters.map(updater =>
   $.coordsEvent(updater.updateColorSpeed)(event)
 ));
-$.onMouseMove(event => boxes.map(box =>
+$.onMouseMove(event => shadowChanges.map(box =>
   $.coordsEvent( updateBoxShadow(box) )(event)
 ));
 

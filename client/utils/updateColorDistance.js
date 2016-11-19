@@ -9,25 +9,25 @@ const atLeast1 = _.atLeast(1);
 const polarize = (c) => colors.applyToHex(c, { h: 180 });
 const updateHue = (c, h) => colors.applyToHex(c, { h });
 
-const changeColors = (elem, baseColor, options) => {
+const changeColors = (elem, baseColor, properties) => {
   let primaryColor = baseColor;
   let secondaryColor = polarize(primaryColor);
 
-  options.primary = options.primary || ['background-color']
-  options.secondary = options.secondary || ['color']
+  properties.primary = properties.primary || ['background-color'];
+  properties.secondary = properties.secondary || ['color'];
 
   return (h) => {
-    primaryColor = updateHue(primaryColor, h)
-    secondaryColor = polarize(primaryColor);
-
     if (!window.IMPORTANT.pause) {
-      options.primary.forEach(p => $(elem, p, primaryColor))
-      options.secondary.forEach(s => $(elem, s, secondaryColor))
+      primaryColor = updateHue(primaryColor, h)
+      secondaryColor = polarize(primaryColor);
+
+      properties.primary.forEach(p => $(elem, p, primaryColor))
+      properties.secondary.forEach(s => $(elem, s, secondaryColor))
     }
   }
 }
 
-const maxChange = 20;
+const maxChange = 30;
 const baseDistance = 700;
 const baseTime = 15;
 
