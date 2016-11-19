@@ -61,7 +61,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 9);
+/******/ 	return __webpack_require__(__webpack_require__.s = 10);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -86,6 +86,9 @@ const tan = deg => Math.tan(toRadian(deg));
 const asin = ratio => toDegree(Math.asin(ratio));
 const acos = ratio => toDegree(Math.acos(ratio));
 const atan = ratio => toDegree(Math.atan(ratio));
+
+const runFn = fn => fn();
+const noop = () => {};
 
 const degreeAroundCenter = (coords, center) => {
   const x = center.x - coords.x;
@@ -116,12 +119,20 @@ function between(n, high, low) {
   return max(min(n, high), low);
 }
 
+function wrap(number, max) {
+  return number >= max ? wrap(number - max, max) : number < 0 ? wrap(max + number, max) : number;
+}
+
 function isNumber(num) {
   return typeof num === 'number';
 }
 
-function isBoolean(num) {
-  return typeof num === 'boolean';
+function isBoolean(bool) {
+  return typeof bool === 'boolean';
+}
+
+function isString(str) {
+  return typeof str === 'string';
 }
 
 function last(thing) {
@@ -196,12 +207,14 @@ function distance(a, b) {
 module.exports = {
   between,
   betweenLinear,
+  wrap,
   portion,
   identity,
   times,
   isNumber,
   isBoolean,
   isArray,
+  isString,
   floor,
   round,
   abs,
@@ -216,6 +229,8 @@ module.exports = {
   find,
   compose,
   distance,
+  runFn,
+  noop,
 
   sin,
   cos,
@@ -235,11 +250,18 @@ module.exports = {
 
 const _ = __webpack_require__(0);
 
+const keyDict = {
+  enter: 13,
+  space: 32,
+  P: 80,
+  p: 112
+};
+
 $ = (elem, prop, value) => elem.style[prop] = value;
 
 $.qsa = document.querySelectorAll.bind(document);
 $.id = document.getElementById.bind(document);
-$.class = document.getElementsByClassName.bind(document);
+$.class = $.cls = className => [].slice.call(document.getElementsByClassName(className));
 
 $.eventDimensions = event => ({
   x: event.clientX + window.pageXOffset,
@@ -247,16 +269,46 @@ $.eventDimensions = event => ({
 });
 
 const eventListener = eventType => (fn, element = document) => {
-  element.addEventListener(eventType, fn);
-  const clear = () => element.removeEventListener(eventType, fn);
-  return clear;
+  const one = elem => {
+    elem.addEventListener(eventType, fn);
+    const clear = () => elem.removeEventListener(eventType, fn);
+    return clear;
+  };
+
+  const multiple = elems => {
+    const clears = elems.map(one);
+    return () => clears.map(_.runFn);
+  };
+
+  return element.length ? multiple(element) : one(element);
 };
 
 $.onMouseMove = eventListener('mousemove');
 $.onHover = eventListener('mouseover');
 $.onOrient = fn => eventListener('deviceorientation')(fn, window);
-
 $.onResize = eventListener('resize');
+
+const keypress = key => (fn, element) => eventListener('keypress')(event => {
+  if (event.keyCode === keyDict[key]) return fn(event);
+}, element);
+
+// key: string | Array<string>
+// => clearing function
+$.onKeyPress = key => {
+  if (_.isArray(key)) {
+    // set all keypress events
+    const presses = key.map(keypress);
+    // return an eventListener function
+    return (fn, element) => {
+      // register all press events
+      const clears = presses.map(press => press(fn, element));
+      // return a clearing fn
+      return () => clears.forEach(_.runFn);
+    };
+  } else {
+    return keypress(key);
+  }
+};
 
 $.center = $.getCenterOfElement = elem => {
   const { top, bottom, left, right } = elem.getBoundingClientRect();
@@ -277,13 +329,15 @@ $.orientEvent = fn => event => {
   fn({ beta, gamma, absolute, alpha, event });
 };
 
+$.distanceFromCenter = (elem, event) => _.distance($.center(elem), event.coords || $.eventDimensions(event));
+
 module.exports = $;
 
 /***/ },
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-const { between } = __webpack_require__(0);
+const { between, wrap } = __webpack_require__(0);
 
 function numToHex(num) {
   let hex = Math.round(Math.min(num, 255)).toString(16);
@@ -374,8 +428,6 @@ function hsvToRgb({ h, s, v }) {
 const hexToHsv = hex => rgbToHsv(hexToRgb(hex));
 const hsvToHex = hsv => rgbToHex(hsvToRgb(hsv));
 
-const wrap = (number, max) => number >= max ? wrap(number - max, max) : number < 0 ? wrap(max + number, max) : number;
-
 function applyToHex(hex, { h = 0, s = 0, v = 0 } = {}, mod = 1) {
   let hsv = hexToHsv(hex);
   return hsvToHex({
@@ -424,94 +476,88 @@ module.exports = {
 "use strict";
 'use strict';
 
+__webpack_require__(9);
+
 const $ = __webpack_require__(1);
 const _ = __webpack_require__(0);
-const colors = __webpack_require__(2);
-const dynamicInterval = __webpack_require__(5);
-const atLeast1 = _.atLeast(1);
+const c = __webpack_require__(2);
+const { updateColorSpeedDistance, changeColors } = __webpack_require__(5);
 
-const polarize = c => colors.applyToHex(c, { h: 180 });
-const updateHue = (c, h) => colors.applyToHex(c, { h });
+const colorSwitchers = $.cls('color-speed-distance');
+const colorMouses = $.cls('color-distance');
+const shadowChanges = $.cls('shadow-change');
+const colorTimeChangers = $.cls('color-time-change');
 
-const changeColors = (elem, baseColor) => {
-  let primaryColor = baseColor;
-  let secondaryColor = polarize(primaryColor);
+const baseSpeed = { distance: 600, time: 1 };
 
-  return (h, speed) => {
-    primaryColor = updateHue(primaryColor, h);
-    secondaryColor = polarize(primaryColor);
+// [{
+//   updateColorSpeed,
+//   updateCenter
+// }]
+const updaters = colorSwitchers.map(box => updateColorSpeedDistance(box, c.applyToHex('#ff0000', { h: _.random(360) }), baseSpeed, {
+  primary: ['background-color'],
+  secondary: ['color']
+}));
+const baseShadowRadius = 20;
+const orientAdjust = 10;
 
-    $(elem, 'background-color', primaryColor);
-    $(elem, 'color', secondaryColor);
-  };
+const updateBoxShadow = box => ({ coords }) => {
+  const center = $.center(box);
+  const distance = _.distance(coords, center);
+  const degree = _.degreeAroundCenter(coords, center);
+
+  const shadowColor = c.applyToHex('#500', {
+    h: _.round(degree),
+    v: _.atMost(0.5)(distance / 800)
+  });
+
+  const shadowRadius = baseShadowRadius * (distance / 350) + baseShadowRadius;
+  const x = _.round(shadowRadius * _.sin(degree));
+  const y = _.round(shadowRadius * _.cos(degree));
+
+  const boxShadowStyle = `${ y }px ${ x }px ${ baseShadowRadius }px ${ shadowColor }`;
+
+  $(box, 'box-shadow', boxShadowStyle);
 };
 
-const maxChange = 20;
-const baseDistance = 700;
-const baseTime = 15;
+const clearOrients = shadowChanges.map(box => {
+  const update = updateBoxShadow(box);
 
-function setColorSpeedForElement(elem, color, factor = 1.5) {
-  const { set, clear } = dynamicInterval(changeColors(elem, color));
+  return $.onOrient($.orientEvent(({ beta, gamma, absolute, alpha }) => {
+    const coords = {
+      x: (gamma < 0 ? 90 + gamma : 90 - gamma) * orientAdjust,
+      y: (90 - beta) * orientAdjust
+    };
+    // beta -- forward backward tilt. 0 when flat on back, negative when backwards, converges at +/- 180 when flat upside down
+    // alpha -- direction. roughly 360/0 when facing north
+    // gamma -- side to side tilt. 0 when flat on either side. negative when left, postive when right (facing both sides), converges at 90
 
-  return rawDistance => {
-    const distance = atLeast1(rawDistance);
-    const distProportion = distance / baseDistance;
+    update({ coords });
+  }));
+});
 
-    let time = _.atLeast(baseTime)(_.round(baseTime * distProportion * factor));
+$.onMouseMove(() => clearOrients.forEach(_.runFn));
+$.onMouseMove(event => updaters.map(updater => $.coordsEvent(updater.updateColorSpeed)(event)));
+$.onMouseMove(event => shadowChanges.map(box => $.coordsEvent(updateBoxShadow(box))(event)));
 
-    const colorChange = _.round(atLeast1(-maxChange * (1 - Math.pow(distProportion, -0.1))));
-    // set(100,100) //<- interesting behavior
-    set(time, colorChange, [time, colorChange]);
-  };
-}
+colorTimeChangers.forEach(elem => {
+  let h = 1;
 
-function updateColorDistance(elem, baseColor, baseSpeed) {
-  let elemCenter = $.center(elem);
-  const setSpeed = setColorSpeedForElement(elem, '#ff0000');
-  setSpeed(baseSpeed.distance, baseSpeed.time);
+  setInterval(() => changeColors(elem, '#ff0000')(h++), 20);
+});
 
-  return {
-    updateSpeed({ coords }) {
-      const distance = _.distance(coords, elemCenter);
-      setSpeed(distance);
-    },
+colorMouses.forEach(elem => {
+  changeColors(elem, '#ff0000')(_.random(360));
+  $.onMouseMove(event => {
+    const dist = $.distanceFromCenter(elem, event);
+    changeColors(elem, '#ff0000')(_.round(dist / 3));
+  });
+});
 
-    updateCenter() {
-      elemCenter = $.center(elem);
-    }
-  };
-}
-
-module.exports = updateColorDistance;
+$.onResize(() => updaters.forEach(({ updateCenter }) => updateCenter()));
 
 /***/ },
 /* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-// style-loader: Adds some css to the DOM by adding a <style> tag
-
-// load the styles
-var content = __webpack_require__(6);
-if(typeof content === 'string') content = [[module.i, content, '']];
-// add the styles to the DOM
-var update = __webpack_require__(8)(content, {});
-if(content.locals) module.exports = content.locals;
-// Hot Module Replacement
-if(false) {
-	// When the styles change, update the <style> tags
-	if(!content.locals) {
-		module.hot.accept("!!./../node_modules/css-loader/index.js!./index.css", function() {
-			var newContent = require("!!./../node_modules/css-loader/index.js!./index.css");
-			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
-			update(newContent);
-		});
-	}
-	// When the module is disposed, remove the <style> tags
-	module.hot.dispose(function() { update(); });
-}
-
-/***/ },
-/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -519,25 +565,36 @@ if(false) {
 
 const _ = __webpack_require__(0);
 
+/*
+  @fn : (setArgs) => void
+
+  // => {
+    set: (time, setArgs) => sets new interval for fn, calling it each time with setArgs
+    clear: () => clears interval
+  }
+*/
 function dynamicInterval(fn) {
   let now = Date.now();
   let intervals = 0;
   let interval, timeout;
 
+  // clear old interval, create a new interval
   const newInterval = (execute, time) => {
     clearInterval(interval);
     interval = setInterval(execute, time);
   };
 
-  const runFn = (...args) => {
-    now = Date.now();
-    fn(...args);
-  };
-
-  const set = (time, ...args) => {
+  const set = (time, ...setArgs) => {
     time = _.round(time);
-    const execute = () => runFn(...args);
 
+    // execute fn with setArgs,
+    const execute = () => {
+      now = Date.now();
+      fn(...setArgs);
+    };
+
+    // find the amount of time already elapsed, deduct that from the new interval,
+    // and set the new interval in the-amount-of-time-left
     const timeElapsed = _.round(Date.now() - now);
     const timeLeft = time - timeElapsed;
     const timeLeftInInterval = _.atLeast(timeLeft, 0);
@@ -560,6 +617,87 @@ function dynamicInterval(fn) {
 module.exports = dynamicInterval;
 
 /***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+'use strict';
+
+const $ = __webpack_require__(1);
+const _ = __webpack_require__(0);
+const colors = __webpack_require__(2);
+const dynamicInterval = __webpack_require__(4);
+const atLeast1 = _.atLeast(1);
+
+const polarize = c => colors.applyToHex(c, { h: 180 });
+const updateHue = (c, h) => colors.applyToHex(c, { h });
+
+const changeColors = (elem, baseColor, properties = {}) => {
+  let primaryColor = baseColor;
+  let secondaryColor = polarize(primaryColor);
+
+  properties.primary = properties.primary || ['background-color'];
+  properties.secondary = properties.secondary || ['color'];
+
+  return input => {
+    const hsv = {
+      h: _.isNumber(input) ? input : input.h,
+      s: input.s,
+      v: input.v
+    };
+
+    if (!window.IMPORTANT.pause) {
+      primaryColor = colors.applyToHex(primaryColor, hsv);
+      secondaryColor = polarize(primaryColor);
+
+      properties.primary.forEach(p => $(elem, p, primaryColor));
+      properties.secondary.forEach(s => $(elem, s, secondaryColor));
+    }
+  };
+};
+
+const maxChange = 30;
+const baseDistance = 700;
+const baseTime = 15;
+
+const defaultOptions = { factor: 1.5 };
+
+function createSpeedSetter(elem, baseColor, { primary, secondary, factor = 1.5 } = defaultOptions) {
+  const { set, clear } = dynamicInterval(changeColors(elem, baseColor, { primary, secondary }));
+
+  return rawDistance => {
+    const distance = atLeast1(rawDistance);
+    const distProportion = distance / baseDistance;
+
+    let time = _.atLeast(baseTime)(_.round(baseTime * distProportion * factor));
+
+    const colorChange = _.round(atLeast1(-maxChange * (1 - Math.pow(distProportion, -0.1))));
+    // set(100,100) //<- interesting behavior
+    set(time, colorChange, [time, colorChange]);
+  };
+}
+
+// create interface to update color speed and element center
+function updateColorSpeedDistance(elem, baseColor, baseSpeed) {
+  let elemCenter = $.center(elem);
+  const setSpeed = createSpeedSetter(elem, baseColor);
+  setSpeed(baseSpeed.distance, baseSpeed.time);
+
+  return {
+    updateColorSpeed({ coords }) {
+      const distance = _.distance(coords, elemCenter);
+      setSpeed(distance);
+    },
+
+    updateCenter() {
+      elemCenter = $.center(elem);
+    }
+  };
+}
+
+module.exports = { updateColorSpeedDistance, changeColors };
+
+/***/ },
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -568,7 +706,7 @@ exports = module.exports = __webpack_require__(7)();
 
 
 // module
-exports.push([module.i, "\n* { padding: 0; margin:0; }\n\n#hero-container {\n  height: 100vh;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n\n#box {\n  width: 400px;\n  height: 200px;\n\n  display: flex;\n  justify-content: center;\n  align-items: center;\n\n  margin-top: -10px;\n  margin-left: -10px;\n  box-shadow: 20px 20px 20px #000;\n  border: 5px solid black;\n  border-radius: 5px;\n\n  font-size: 30px;\n\n  cursor: pointer;\n\n  transition: margin 100ms, box-shadow 90ms;\n}\n#box:active {\n  margin-top: 0;\n  margin-left: 0;\n  box-shadow: 0 0 0 !important;\n}\n", ""]);
+exports.push([module.i, "\n* { padding: 0; margin:0; }\n\nnav {\n  width: 100%;\n  min-height: 50px;\n  position: fixed;\n  border: 5px solid black;\n}\n\nnav .nav-header {\n  font-size: 30px;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  border-bottom: 5px solid black;\n}\n\nnav .nav-menu {\n  display: flex;\n}\n\nnav .nav-menu .nav-menu-item {\n  flex: 1;\n  min-height: 30px;\n  border-right: 5px solid black;\n\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n\n#hero-container {\n  height: 100vh;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n\n.box {\n  width: 400px;\n  height: 200px;\n\n  display: inline-block;\n  border: 5px solid black;\n  border-radius: 5px;\n\n  font-size: 30px;\n\n  cursor: pointer;\n\n  transition: margin 100ms, box-shadow 90ms;\n}\n\n.box > * {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  height: 100%;\n  width: 100%;\n}\n\n.shadow-change {\n/*  margin-top: -10px;\n  margin-left: -10px;*/\n  box-shadow: 20px 20px 20px #000;\n}\n\n.shadow-change:active {\n  margin-top: 10px;\n  margin-left: 10px;\n  box-shadow: 0 0 0 !important;\n}\n", ""]);
 
 // exports
 
@@ -885,59 +1023,44 @@ function updateLink(linkElement, obj) {
 /* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(6);
+if(typeof content === 'string') content = [[module.i, content, '']];
+// add the styles to the DOM
+var update = __webpack_require__(8)(content, {});
+if(content.locals) module.exports = content.locals;
+// Hot Module Replacement
+if(false) {
+	// When the styles change, update the <style> tags
+	if(!content.locals) {
+		module.hot.accept("!!./../node_modules/css-loader/index.js!./index.css", function() {
+			var newContent = require("!!./../node_modules/css-loader/index.js!./index.css");
+			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+			update(newContent);
+		});
+	}
+	// When the module is disposed, remove the <style> tags
+	module.hot.dispose(function() { update(); });
+}
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
 "use strict";
 'use strict';
 
-__webpack_require__(4);
-
 const $ = __webpack_require__(1);
-const _ = __webpack_require__(0);
-const c = __webpack_require__(2);
-const updateColorDistance = __webpack_require__(3);
 
-const box = $.id('box');
-const baseSpeed = { distance: 600, time: 1 };
-const { updateSpeed, updateCenter } = updateColorDistance(box, '#ff0000', baseSpeed);
-const baseShadowRadius = 20;
-const orientAdjust = 10;
-
-const updateBoxShadow = ({ coords }) => {
-  const center = $.center(box);
-  const distance = _.distance(coords, center);
-  const degree = _.degreeAroundCenter(coords, center);
-
-  const shadowColor = c.applyToHex('#500', {
-    h: _.round(degree),
-    v: _.atMost(0.5)(distance / 800)
-  });
-
-  const shadowRadius = baseShadowRadius * (distance / 350) + baseShadowRadius;
-  const x = _.round(shadowRadius * _.sin(degree));
-  const y = _.round(shadowRadius * _.cos(degree));
-
-  const boxShadowStyle = `${ y }px ${ x }px ${ baseShadowRadius }px ${ shadowColor }`;
-
-  console.log(boxShadowStyle);
-
-  $(box, 'box-shadow', boxShadowStyle);
+window.IMPORTANT = {
+  pause: false
 };
 
-const clearOrient = $.onOrient($.orientEvent(({ beta, gamma, absolute, alpha }) => {
+$.onKeyPress(['p', 'P'])(() => window.IMPORTANT.pause = !window.IMPORTANT.pause);
 
-  const coords = {
-    x: (gamma < 0 ? 90 + gamma : 90 - gamma) * orientAdjust,
-    y: (90 - beta) * orientAdjust
-  };
-  // beta -- forward backward tilt. 0 when flat on back, negative when backwards, converges at +/- 180 when flat upside down
-  // alpha -- direction. roughly 360/0 when facing north
-  // gamma -- side to side tilt. 0 when flat on either side. negative when left, postive when right (facing both sides), converges at 90
-  updateBoxShadow({ coords });
-}));
-$.onMouseMove(clearOrient);
-$.onMouseMove($.coordsEvent(updateSpeed));
-$.onMouseMove($.coordsEvent(updateBoxShadow));
-
-$.onResize(updateCenter);
+__webpack_require__(3);
 
 /***/ }
 /******/ ]);
