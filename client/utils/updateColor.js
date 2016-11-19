@@ -16,9 +16,15 @@ const changeColors = (elem, baseColor, properties={}) => {
   properties.primary = properties.primary || ['background-color'];
   properties.secondary = properties.secondary || ['color'];
 
-  return (h) => {
+  return (input) => {
+    const hsv = {
+      h: _.isNumber(input) ? input : input.h,
+      s: input.s,
+      v: input.v
+    }
+
     if (!window.IMPORTANT.pause) {
-      primaryColor = updateHue(primaryColor, h)
+      primaryColor = colors.applyToHex(primaryColor, hsv);
       secondaryColor = polarize(primaryColor);
 
       properties.primary.forEach(p => $(elem, p, primaryColor))

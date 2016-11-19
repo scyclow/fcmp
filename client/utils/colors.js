@@ -1,4 +1,4 @@
-const { between } = require('./_');
+const { between, wrap } = require('./_');
 
 function numToHex(num) {
   let hex = Math.round( Math.min(num, 255) ).toString(16);
@@ -91,12 +91,6 @@ function hsvToRgb({ h, s, v }) {
 
 const hexToHsv = (hex) => rgbToHsv( hexToRgb(hex) );
 const hsvToHex = (hsv) => rgbToHex( hsvToRgb(hsv) );
-
-const wrap = (number, max) => (
-  number >= max ? wrap(number - max, max) :
-  number < 0    ? wrap(max + number, max) :
-  number
-);
 
 function applyToHex(hex, {h=0, s=0, v=0} = {}, mod=1) {
   let hsv = hexToHsv(hex);

@@ -9,6 +9,7 @@ const { updateColorSpeedDistance, changeColors } = require('./utils/updateColor'
 
 
 const colorSwitchers = $.cls('color-speed-distance');
+const colorMouses = $.cls('color-distance');
 const shadowChanges = $.cls('shadow-change');
 const colorTimeChangers = $.cls('color-time-change');
 
@@ -47,10 +48,11 @@ const updateBoxShadow = box => ({ coords }) => {
 };
 
 
-const clearOrients = shadowChanges.map(box =>
-  $.onOrient(
-    $.orientEvent(({ beta, gamma, absolute, alpha }) => {
+const clearOrients = shadowChanges.map(box => {
+  const update = updateBoxShadow(box);
 
+  return $.onOrient(
+    $.orientEvent(({ beta, gamma, absolute, alpha }) => {
       const coords = {
         x: ((gamma < 0) ? (90 + gamma) : (90 - gamma)) * orientAdjust,
         y: (90 - beta) * orientAdjust
@@ -59,10 +61,10 @@ const clearOrients = shadowChanges.map(box =>
       // alpha -- direction. roughly 360/0 when facing north
       // gamma -- side to side tilt. 0 when flat on either side. negative when left, postive when right (facing both sides), converges at 90
 
-      updateBoxShadow(box, { coords });
+      update({ coords });
     })
   )
-);
+});
 
 $.onMouseMove(() => clearOrients.forEach(_.runFn));
 $.onMouseMove((event) => updaters.map(updater =>
@@ -74,7 +76,16 @@ $.onMouseMove(event => shadowChanges.map(box =>
 
 colorTimeChangers.forEach(elem => {
   let h = 1
+
   setInterval(() => changeColors(elem, '#ff0000')(h++), 20)
+});
+
+colorMouses.forEach(elem => {
+  changeColors(elem, '#ff0000')(_.random(360))
+  $.onMouseMove(event => {
+    const dist = $.distanceFromCenter(elem, event);
+    changeColors(elem, '#ff0000')(_.round(dist / 3))
+  })
 })
 
 $.onResize(() => updaters.forEach(({ updateCenter }) => updateCenter()));

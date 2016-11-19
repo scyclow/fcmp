@@ -84,4 +84,9 @@ $.orientEvent = (fn) => (event) => {
   fn({ beta, gamma, absolute, alpha, event })
 }
 
+$.distanceFromCenter = (elem, event) => _.distance(
+  $.center(elem),
+  event.coords || $.eventDimensions(event)
+);
+
 module.exports = $;

@@ -57,12 +57,24 @@ function between(n, high, low) {
   );
 }
 
+function wrap(number, max) {
+  return (
+    number >= max ? wrap(number - max, max) :
+    number < 0    ? wrap(max + number, max) :
+    number
+  );
+}
+
 function isNumber(num) {
   return typeof num === 'number';
 }
 
-function isBoolean(num) {
-  return typeof num === 'boolean';
+function isBoolean(bool) {
+  return typeof bool === 'boolean';
+}
+
+function isString(str) {
+  return typeof str === 'string';
 }
 
 function last(thing) {
@@ -142,12 +154,14 @@ function distance(a, b) {
 module.exports = {
   between,
   betweenLinear,
+  wrap,
   portion,
   identity,
   times,
   isNumber,
   isBoolean,
   isArray,
+  isString,
   floor,
   round,
   abs,

@@ -1,6 +1,5 @@
 'use strict'
 
-require('./styles.js');
 const $ = require('./utils/$');
 
 window.IMPORTANT = {
@@ -10,3 +9,5 @@ window.IMPORTANT = {
 $.onKeyPress(['p', 'P'])(() =>
   window.IMPORTANT.pause = !window.IMPORTANT.pause
 );
+
+require('./styles.js');
