@@ -16,6 +16,10 @@ const asin = (ratio) => toDegree(Math.asin(ratio));
 const acos = (ratio) => toDegree(Math.acos(ratio));
 const atan = (ratio) => toDegree(Math.atan(ratio));
 
+const runFn = fn => fn();
+const noop = () => {};
+
+
 const degreeAroundCenter = (coords, center) => {
   const x = center.x - coords.x;
   const y = center.y - coords.y;
@@ -134,6 +138,7 @@ function distance(a, b) {
   return ((xDiff ** 2) + (yDiff ** 2)) ** 0.5;
 }
 
+
 module.exports = {
   between,
   betweenLinear,
@@ -157,6 +162,8 @@ module.exports = {
   find,
   compose,
   distance,
+  runFn,
+  noop,
 
   sin,
   cos,

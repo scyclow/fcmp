@@ -1,28 +1,69 @@
 
 const _ = require('./_');
 
+const keyDict = {
+  enter: 13,
+  space: 32,
+  P: 80,
+  p: 112
+};
+
 $ = (elem, prop, value) => elem.style[prop] = value;
 
 $.qsa = document.querySelectorAll.bind(document);
 $.id = document.getElementById.bind(document);
-$.class = document.getElementsByClassName.bind(document);
+$.class = $.cls = (className) => [].slice.call(document.getElementsByClassName(className));
 
 $.eventDimensions = (event) => ({
   x: event.clientX + window.pageXOffset,
   y: event.clientY + window.pageYOffset,
 });
 
+
 const eventListener = (eventType) => (fn, element = document) => {
-  element.addEventListener(eventType, fn);
-  const clear = () => element.removeEventListener(eventType, fn);
-  return clear;
+  const one = (elem) => {
+    elem.addEventListener(eventType, fn);
+    const clear = () => elem.removeEventListener(eventType, fn);
+    return clear;
+  };
+
+  const multiple = (elems) => {
+    const clears = elems.map(one);
+    return () => clears.map(_.runFn);
+  };
+
+  return element.length
+    ? multiple(element)
+    : one(element);
 }
 
 $.onMouseMove = eventListener('mousemove');
 $.onHover = eventListener('mouseover');
-$.onOrient = fn => eventListener('deviceorientation')(fn, window);
-
+$.onOrient = (fn) => eventListener('deviceorientation')(fn, window);
 $.onResize = eventListener('resize');
+
+const keypress = (key) => (fn, element) => eventListener('keypress')((event) => {
+  if (event.keyCode === keyDict[key]) return fn(event);
+}, element);
+
+// key: string | Array<string>
+// => clearing function
+$.onKeyPress = (key) => {
+  if (_.isArray(key)) {
+    // set all keypress events
+    const presses = key.map(keypress);
+    // return an eventListener function
+    return (fn, element) => {
+      // register all press events
+      const clears = presses.map(press => press(fn, element));
+      // return a clearing fn
+      return () => clears.forEach(_.runFn);
+    }
+  }
+  else {
+    return keypress(key);
+  }
+}
 
 $.center = $.getCenterOfElement = (elem) => {
   const { top, bottom, left, right } = elem.getBoundingClientRect();

@@ -3,18 +3,16 @@
 
 #hero-container {
   height: 100vh;
-  display: flex;
+/*  display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: center;*/
 }
 
-#box {
+.box {
   width: 400px;
   height: 200px;
 
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: inline-block;
 
   margin-top: -10px;
   margin-left: -10px;
@@ -28,6 +26,15 @@
 
   transition: margin 100ms, box-shadow 90ms;
 }
+
+.inner-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
 #box:active {
   margin-top: 0;
   margin-left: 0;

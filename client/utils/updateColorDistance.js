@@ -9,16 +9,21 @@ const atLeast1 = _.atLeast(1);
 const polarize = (c) => colors.applyToHex(c, { h: 180 });
 const updateHue = (c, h) => colors.applyToHex(c, { h });
 
-const changeColors = (elem, baseColor) => {
+const changeColors = (elem, baseColor, options) => {
   let primaryColor = baseColor;
   let secondaryColor = polarize(primaryColor);
+
+  options.primary = options.primary || ['background-color']
+  options.secondary = options.secondary || ['color']
 
   return (h) => {
     primaryColor = updateHue(primaryColor, h)
     secondaryColor = polarize(primaryColor);
 
-    $(elem, 'background-color', primaryColor);
-    $(elem, 'color', secondaryColor);
+    if (!window.IMPORTANT.pause) {
+      options.primary.forEach(p => $(elem, p, primaryColor))
+      options.secondary.forEach(s => $(elem, s, secondaryColor))
+    }
   }
 }
 
@@ -26,8 +31,10 @@ const maxChange = 20;
 const baseDistance = 700;
 const baseTime = 15;
 
-function createSpeedSetter (elem, baseColor, factor = 1.5) {
-  const { set, clear } = dynamicInterval(changeColors(elem, baseColor));
+const defaultOptions = { factor: 1.5 };
+
+function createSpeedSetter (elem, baseColor, { primary, secondary, factor=1.5 } = defaultOptions) {
+  const { set, clear } = dynamicInterval(changeColors(elem, baseColor, { primary, secondary }));
 
   return (rawDistance) => {
     const distance = atLeast1(rawDistance);
@@ -46,13 +53,13 @@ function createSpeedSetter (elem, baseColor, factor = 1.5) {
 }
 
 // create interface to update color speed and element center
-function updateColorDistance(elem, baseColor, baseSpeed) {
+function updateColorSpeedDistance(elem, baseColor, baseSpeed) {
   let elemCenter = $.center(elem);
-  const setSpeed = createSpeedSetter(elem, '#ff0000');
+  const setSpeed = createSpeedSetter(elem, baseColor);
   setSpeed(baseSpeed.distance, baseSpeed.time);
 
   return {
-    updateSpeed({coords}) {
+    updateColorSpeed({coords}) {
       const distance = _.distance(coords, elemCenter);
       setSpeed(distance);
     },
@@ -63,4 +70,4 @@ function updateColorDistance(elem, baseColor, baseSpeed) {
   }
 }
 
-module.exports = updateColorDistance;
+module.exports = updateColorSpeedDistance;

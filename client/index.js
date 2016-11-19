@@ -5,15 +5,31 @@ require('./index.css')
 const $ = require('./utils/$');
 const _ = require('./utils/_');
 const c = require('./utils/colors');
-const updateColorDistance = require('./utils/updateColorDistance');
+const updateColorSpeedDistance = require('./utils/updateColorDistance');
 
-const box = $.id('box');
+window.IMPORTANT = {
+  pause: false
+};
+
+const boxes = $.cls('box');
+
+// const box = $.id('box');
 const baseSpeed = { distance: 600, time: 1 };
-const { updateSpeed, updateCenter } = updateColorDistance(box, '#ff0000', baseSpeed);
+
+// [{
+//   updateColorSpeed,
+//   updateCenter
+// }]
+const updaters = boxes.map(box =>
+  updateColorSpeedDistance(box, '#ff0000', baseSpeed, {
+    primary: ['background-color'],
+    secondary: ['color']
+  })
+);
 const baseShadowRadius = 20;
 const orientAdjust = 10;
 
-const updateBoxShadow = ({ coords }) => {
+const updateBoxShadow = box => ({ coords }) => {
   const center = $.center(box);
   const distance = _.distance(coords, center);
   const degree = _.degreeAroundCenter(coords, center);
@@ -29,26 +45,39 @@ const updateBoxShadow = ({ coords }) => {
 
   const boxShadowStyle = `${y}px ${x}px ${baseShadowRadius}px ${shadowColor}`;
 
-  console.log(boxShadowStyle);
 
   $(box, 'box-shadow', boxShadowStyle);
 };
 
 
-const clearOrient =
-$.onOrient($.orientEvent(({ beta, gamma, absolute, alpha}) => {
+const clearOrients = boxes.map(box =>
+  $.onOrient(
+    $.orientEvent(({ beta, gamma, absolute, alpha }) => {
 
-  const coords = {
-    x: ((gamma < 0) ? (90 + gamma) : (90 - gamma)) * orientAdjust,
-    y: (90 - beta) * orientAdjust
-  };
-  // beta -- forward backward tilt. 0 when flat on back, negative when backwards, converges at +/- 180 when flat upside down
-  // alpha -- direction. roughly 360/0 when facing north
-  // gamma -- side to side tilt. 0 when flat on either side. negative when left, postive when right (facing both sides), converges at 90
-  updateBoxShadow({ coords })
-}));
-$.onMouseMove(clearOrient)
-$.onMouseMove($.coordsEvent(updateSpeed));
-$.onMouseMove($.coordsEvent(updateBoxShadow));
+      const coords = {
+        x: ((gamma < 0) ? (90 + gamma) : (90 - gamma)) * orientAdjust,
+        y: (90 - beta) * orientAdjust
+      };
+      // beta -- forward backward tilt. 0 when flat on back, negative when backwards, converges at +/- 180 when flat upside down
+      // alpha -- direction. roughly 360/0 when facing north
+      // gamma -- side to side tilt. 0 when flat on either side. negative when left, postive when right (facing both sides), converges at 90
 
-$.onResize(updateCenter);
+      updateBoxShadow(box, { coords });
+    })
+  )
+)
+
+
+$.onMouseMove(() => clearOrients.forEach(_.runFn))
+$.onMouseMove((event) => updaters.map(updater =>
+  $.coordsEvent(updater.updateColorSpeed)(event)
+));
+$.onMouseMove(event => boxes.map(box =>
+  $.coordsEvent( updateBoxShadow(box) )(event)
+));
+
+$.onResize(() => updaters.forEach(({ updateCenter }) => updateCenter()));
+
+$.onKeyPress(['p', 'P'])(event => {
+  window.IMPORTANT.pause = !window.IMPORTANT.pause
+})
