@@ -1,11 +1,40 @@
 
 * { padding: 0; margin:0; }
 
+nav {
+  width: 100%;
+  min-height: 50px;
+  position: fixed;
+  border: 5px solid black;
+}
+
+nav .nav-header {
+  font-size: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 5px solid black;
+}
+
+nav .nav-menu {
+  display: flex;
+}
+
+nav .nav-menu .nav-menu-item {
+  flex: 1;
+  min-height: 30px;
+  border-right: 5px solid black;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 #hero-container {
   height: 100vh;
-/*  display: flex;
+  display: flex;
   justify-content: center;
-  align-items: center;*/
+  align-items: center;
 }
 
 .box {

@@ -5,11 +5,12 @@ require('./index.css');
 const $ = require('./utils/$');
 const _ = require('./utils/_');
 const c = require('./utils/colors');
-const updateColorSpeedDistance = require('./utils/updateColorDistance');
+const { updateColorSpeedDistance, changeColors } = require('./utils/updateColor');
 
 
-const colorSwitches = $.cls('color-switch');
+const colorSwitchers = $.cls('color-speed-distance');
 const shadowChanges = $.cls('shadow-change');
+const colorTimeChangers = $.cls('color-time-change');
 
 const baseSpeed = { distance: 600, time: 1 };
 
@@ -17,8 +18,8 @@ const baseSpeed = { distance: 600, time: 1 };
 //   updateColorSpeed,
 //   updateCenter
 // }]
-const updaters = colorSwitches.map(box =>
-  updateColorSpeedDistance(box, '#ff0000', baseSpeed, {
+const updaters = colorSwitchers.map(box =>
+  updateColorSpeedDistance(box, c.applyToHex('#ff0000', { h: _.random(360) }), baseSpeed, {
     primary: ['background-color'],
     secondary: ['color']
   })
@@ -41,7 +42,6 @@ const updateBoxShadow = box => ({ coords }) => {
   const y = _.round(shadowRadius * _.cos(degree));
 
   const boxShadowStyle = `${y}px ${x}px ${baseShadowRadius}px ${shadowColor}`;
-
 
   $(box, 'box-shadow', boxShadowStyle);
 };
@@ -71,5 +71,10 @@ $.onMouseMove((event) => updaters.map(updater =>
 $.onMouseMove(event => shadowChanges.map(box =>
   $.coordsEvent( updateBoxShadow(box) )(event)
 ));
+
+colorTimeChangers.forEach(elem => {
+  let h = 1
+  setInterval(() => changeColors(elem, '#ff0000')(h++), 20)
+})
 
 $.onResize(() => updaters.forEach(({ updateCenter }) => updateCenter()));

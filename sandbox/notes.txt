@@ -1,0 +1,251 @@
+CONGRATULATIONS!
+
+You've been selected to be an early participant in an exciting new investment opportunity!
+
+Don't miss out on the investment opportunity of a lifetime that professional investment experts don't want you to know about!
+
+FastCashMoneyPlus(TM) is the premier FastCash(TM) accumulation platform on the web, and as an early-stage investor, you are gaurenteed to accumulate wealth beyond the capacity of your imagination, as an early stage investor and member of the FastCash(TM) community.
+
+Through utilizing a world-class, patent-pending digital infrastructure, FastCashMoneyPlus (TM) is guarenteed to disrupt the financial technology industry and reward it's investors with a handsome profit.
+You simply can't lose! This is the investment opportunity of a lifetime.
+
+Act NOW by joining scores of people jsut like yourself who have realized staggering amounts of wealth by using the FastCashMoneyPlus (TM)'s patented wealth-accumulation platform!
+
+FastCashMoneyPlus has brought happiness and meaning to thousands of human beings all accross the global economy.
+
+
+
+
+
+
+
+In addition all users who sign up before {{Date.now()+(5*24*60*60*1000)|format:'shortDate'}} will receive an additional substantial FastCash!
+
+________________________
+| start now
+| 100% secure
+| 100% legal
+| make cash fast
+| make fast cash
+________________________
+
+
+
+
+USER DASHBOARD
+
+Balance: >$15.00
+______________________________________
+| http://fast.plus/sexCLICK3tDIGITAL |
+--------------------------------------
+^^^ Share this link and watch your FASTCASH grow!
+FOR MORE INFORMATION CLICK THIS LINK
+
+
+
+
+====
+
+Welcome to FastCashMoneyPlus.biz! As a new user, you will receive >$ 500. This represents a portion of ownership in the global pool of fast cash. As FCMP grows in size, your share of FC will become increasingly valuable.
+
+There are three ways to make fastcash.
+The most lucrative: you will receive >$100 for every person you share your exclusive url with. In addition, you will receive an additional >$500 for every person who signs up. Furthermore, you are entitled to a 5% comission of all fastcash they earn. As an early investor, you have advantagous standing. One of the many benefits of the multilevel marketing platform
+join the market place:
+
+
+cryptocurrencies are just too darn unreliable. do you really trust a ledger floating around in the ether that anyone can edit? I sure don't!
+
+
+++++
+UX
+  initial shock from CSS barf
+  prompt for call to action clearly visible
+  gibberish text explaining fcmp
+  about
+  jobs
+  disclaimer
+
+sign up flow:
+  click call to action
+  (either wizard, or modal with scrolling)
+  text explaining what's about to happen -> visual prompt to click next
+    "welcome aboard, you'll be making fastcash in no time! we jsut need some infor from you. lets get started"
+  username + PW
+    pw displayed in plaintext - limited to 8 characters, lowercase letters
+      "we reccomend something easy to remember, like password"
+      visual/audio validation on form
+  (optional) security Qs (ssn, credit card n, mother's maiden name)
+  email (would you be interested in promotional offers from FCMP.biz?)
+  legal disclaimer
+
+  >>> fwd to user home HELP
+
+home page
+  obnoxiously large help button
+    help page expalians rules clearly
+    special link to share with friends
+
+
+
+
+++++++
+
+Features:
+  view fastcash
+  transfer fastcash
+  make more fastcash by sharing link
+
+  fastcash mining -> allocate some fastcash to fastcash mining algos, and make a small interest rate on the investment
+
+  lend fastcash to othe
+  buy ad space
+  the fastcash digital economy exhibits one of the most efficient resource allocation mechanisms of the 21 century. users have the ability to buy Public Requests For Transfer, in which they set up a trust containing an initial seed of fast cash wealth. the principal of said trust then writes out a charter and solicites fastcash investments from other users. in return, the investors recieve a slice of equity of the trust.
+
+
+
+
+
++++++=
+
+
+
+New user sees a super stripped-down interface.
+  BALANCE: 15.00
+
+
+Feature ideas:
+
+
+  buyable features ->
+    shorter fast.plus url
+
+
+
+  you can buy other accounts.
+
+  make account codes shorter ->
+    3 words
+    randomly insert a few cryptos
+
+  fastcash can buy badges
+
+  cool visualization of
+
+
+
+
+
+
+
+  canvas behind callToAction -> trail of random color currency symbols on mouse move
+  all content rendered next to each other; overflow: hidden. on click, animate frame from left
+  no sound. as mouse gets closer to CTA, button color rotates faster.
+  as user progresses through wizard, increase tone.
+
+  userdashboard
+
+
+
+
+side project: Lorem ipsum generator
+  UI to choose
+
+
+$$$$$$
+
+Cli in dev console
+  LetsGetStartedNow()
+  Transfer, Easter egg cash, get jwts
+  Dev mode with lots of gibberish output
+
+About page
+Jobs page
+Blog/in the news
+
+Landing page pop-up
+  Text - sign up now and get x fastcash!
+  Button - sign up now!
+
+Client should send message types to server. Server should validate and assign amount
+
+User app should be mostly black and white with no special fonts. Menu items are buttons. Maybe they become flashy on hover
+
+Users each have their own special emblem derived from their account id. They can view it from user page. It appears on landing page upon referral.
+
+Landing background color rotates in opposite direction as button at constant speed when mouse, or based on phone xyz
+
+
+Business Logic: Accounts and Addresses
+  - each user has an account, which has a single store of fastcash
+  - addresses are just addresses where fastcash can be sent to. each address has a principal account, which has full control over the use of the address
+  - addresses have a concept of equity, where accounts can own a portion of the fastcash flow from that address.
+  - each address has a url and an emblem associated with it.
+  - each address costs non-trivial fastcash to set up
+
+
+
+"drenched in wealth"
+
+
+"Fastcashmoneyplus is the premier digital currency platform of the 21st century. Don't be fooled by all the talk you hear about "cryptography currencies". These are the BEST way to lose your money. They are a SCAM. Only a fool would use a "currency" that lived on a public ledger without a central point of truth. If it sounds easy to hack, that's because it is! Hackers love the idea of you storing your wealth out in the open for the whole world to see. But they hardly stand a chance when your account is protected in the digital equivalent of a locked vault! <insert picture of locked vault> Only fastcashmoneyplus, with its patent-pending digital security infrastructure is equipped to protect you AND your digital wealth. "
+
+Reviews
+"I used to be a struggling single mother in the Bronx before I discovered fcmp.biz. and then my life was turned around. Now I can afford to pay for college for my children." Wendy Pilsen
+
+"I use fast cash to to make cash fast." Wendy Pilsen
+
+"It seems like nowadays you can use fast cash for nearly anything! Just last week I refinanced my third mortgage with fastcash as collateral." Joe Smith
+
+
+
+
+
+
+
+
+
+Weird appspector stuff --
+console:
+
+GET http://s3.eu-central-1.amazonaws.com/forton/cbp/cmps/50_c211e.js VM570:1
+  (anonymous function) @ VM570:1
+  (anonymous function) @ VM570:1
+
+
+
+
+offending code:
+```
+
+(() => {var s = document.createElement('script');s.src = '//s3.eu-central-1.amazonaws.com/forton/cbp/cmps/50_c211e.js';document.body.appendChild(s);})();
+
+
+```
+
+
+
+request:
+
+GET /forton/cbp/cmps/50_c211e.js HTTP/1.1
+Host: s3.eu-central-1.amazonaws.com
+Connection: keep-alive
+Pragma: no-cache
+Cache-Control: no-cache
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36
+Accept: */*
+DNT: 1
+Referer: http://localhost:3000/
+Accept-Encoding: gzip, deflate, sdch
+Accept-Language: en-US,en;q=0.8
+
+
+
+Response:
+
+HTTP/1.1 403 Forbidden
+x-amz-request-id: DB6EE1274CC1FEA0
+x-amz-id-2: ffs7aqQvK8ebNBs6GXXuhp09oOh2hYhxow2pQWutdLxL7fihNANu2c9dC/+Pwj8bseEI1ci0G3c=
+Content-Type: application/xml
+Transfer-Encoding: chunked
+Date: Sat, 12 Nov 2016 03:45:51 GMT
+Server: AmazonS3

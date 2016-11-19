@@ -9,7 +9,7 @@ const atLeast1 = _.atLeast(1);
 const polarize = (c) => colors.applyToHex(c, { h: 180 });
 const updateHue = (c, h) => colors.applyToHex(c, { h });
 
-const changeColors = (elem, baseColor, properties) => {
+const changeColors = (elem, baseColor, properties={}) => {
   let primaryColor = baseColor;
   let secondaryColor = polarize(primaryColor);
 
@@ -70,4 +70,4 @@ function updateColorSpeedDistance(elem, baseColor, baseSpeed) {
   }
 }
 
-module.exports = updateColorSpeedDistance;
+module.exports = { updateColorSpeedDistance, changeColors };
