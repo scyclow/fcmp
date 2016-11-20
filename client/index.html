@@ -16,6 +16,39 @@
   >
 </head>
 
+<style>
+  #signup-modal-container {
+    position: fixed;
+    height: 100vh;
+    width: 100vw;
+    z-index: 500;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 100vw;
+    transition: margin-left 0.5s;
+    -webkit-transition-timing-function: linear; /* Safari and Chrome */
+    transition-timing-function: linear;
+  }
+
+  .signup-modal-background {
+    background-color: #000;
+    opacity: 0.5;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    z-index: 501;
+  }
+
+  .signup-modal {
+    width: 75%
+    height: 75%;
+    min-width: 300px;
+    min-height: 300px;
+    background-color: #fff;
+    z-index: 502;
+  }
+</style>
 
 <body>
   <nav>
@@ -28,11 +61,24 @@
     </div>
   </nav>
 
-  <div id="hero-container">
-    <button class="call-to-action shadow-change color-distance">
-      <span> CLICK </span>
+  <div id='signup-modal-container'>
+    <div class="signup-modal-background"></div>
+    <div class="signup-modal">
+      bleh
+      bleh
+      bleh
+      bleh
+      bleh
+      bleh
+    </div>
+  </div>
+
+  <div class="hero-container">
+    <button id="call-to-action" class="shadow-change color-distance">
+      <span> GET STARTED NOW </span>
     </button>
   </div>
+
 </body>
 
 </html>

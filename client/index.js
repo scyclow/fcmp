@@ -12,3 +12,13 @@ $.onKeyPress(['p', 'P'])(() =>
 );
 
 require('./styles.js');
+
+const callToAction = $.id('call-to-action');
+const signUpModal = $.id('signup-modal-container');
+$.onClick(
+  () => setTimeout(
+    () => $(signUpModal, 'margin-left', 0),
+    300
+  ),
+  callToAction
+);

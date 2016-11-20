@@ -103,6 +103,9 @@ $.onHover = (fnEnter, fnLeave, element) => {
   ];
 
   return () => clears.forEach(_.runFn)
-}
+};
 
+$.onClick = eventListener('click', true);
+
+window.$ = $;
 module.exports = $;
