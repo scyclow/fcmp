@@ -47,7 +47,10 @@ const updateBoxShadow = box => ({ coords }) => {
   $(box, 'box-shadow', boxShadowStyle);
 };
 
-
+// change box shadow when device orientation changes
+// beta -- forward backward tilt. 0 when flat on back, negative when backwards, converges at +/- 180 when flat upside down
+// alpha -- direction. roughly 360/0 when facing north
+// gamma -- side to side tilt. 0 when flat on either side. negative when left, postive when right (facing both sides), converges at 90
 const clearOrients = shadowChanges.map(box => {
   const update = updateBoxShadow(box);
 
@@ -57,35 +60,53 @@ const clearOrients = shadowChanges.map(box => {
         x: ((gamma < 0) ? (90 + gamma) : (90 - gamma)) * orientAdjust,
         y: (90 - beta) * orientAdjust
       };
-      // beta -- forward backward tilt. 0 when flat on back, negative when backwards, converges at +/- 180 when flat upside down
-      // alpha -- direction. roughly 360/0 when facing north
-      // gamma -- side to side tilt. 0 when flat on either side. negative when left, postive when right (facing both sides), converges at 90
 
       update({ coords });
     })
   )
 });
 
+// remove orientation effects when there is a mouse event
 $.onMouseMove(() => clearOrients.forEach(_.runFn));
+
+// update color speed of element based on distace from mouse
 $.onMouseMove((event) => updaters.map(updater =>
   $.coordsEvent(updater.updateColorSpeed)(event)
 ));
+
+// FIXME (onResize) -- update center of element on window resize
+$.onResize(() => updaters.forEach(({ updateCenter }) => updateCenter()));
+
+// change shadow angle and color depending mouse position relative to center of element
 $.onMouseMove(event => shadowChanges.map(box =>
   $.coordsEvent( updateBoxShadow(box) )(event)
 ));
 
+// continuously rotate element color
 colorTimeChangers.forEach(elem => {
   let h = 1
-
-  setInterval(() => changeColors(elem, '#ff0000')(h++), 20)
+  setInterval(() => changeColors(elem, '#ff0000')(h++), 20);
 });
 
+const baseButtonColor = c.polarize('#ff0000');
+
+// Color changes as mouse gets closer to center of element; polarizes on hover
 colorMouses.forEach(elem => {
-  changeColors(elem, '#ff0000')(_.random(360))
+  // random color when there is no initial mouse
+  changeColors(elem, baseButtonColor)(_.random(360));
+
+  let isHovering;
+
+  $.onHover(
+    enterEvent => isHovering = true,
+    leaveEvent => isHovering = false,
+    elem
+  );
+
   $.onMouseMove(event => {
     const dist = $.distanceFromCenter(elem, event);
-    changeColors(elem, '#ff0000')(_.round(dist / 3))
+    const hue = _.round(dist / 3);
+    const adj = isHovering ? 180 : 0;
+    changeColors(elem, baseButtonColor)(hue + adj)
   })
-})
-
-$.onResize(() => updaters.forEach(({ updateCenter }) => updateCenter()));
+});

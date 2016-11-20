@@ -123,6 +123,10 @@ function randHex() {
   return color.toUpperCase();
 }
 
+function polarize(hex) {
+  return applyToHex(hex, { h: 180 })
+}
+
 module.exports = {
   applyToHex,
   __experimental__: { setHsvOnHex },
@@ -132,5 +136,6 @@ module.exports = {
   numToHex,
   rgbToHex,
   rgbToHsv,
-  randHex
+  randHex,
+  polarize
 };

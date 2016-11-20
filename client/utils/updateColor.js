@@ -2,16 +2,13 @@
 
 const $ = require('./$');
 const _ = require('./_');
-const colors = require('./colors');
+const c = require('./colors');
 const dynamicInterval = require('./dynamicInterval');
 const atLeast1 = _.atLeast(1);
 
-const polarize = (c) => colors.applyToHex(c, { h: 180 });
-const updateHue = (c, h) => colors.applyToHex(c, { h });
-
 const changeColors = (elem, baseColor, properties={}) => {
   let primaryColor = baseColor;
-  let secondaryColor = polarize(primaryColor);
+  let secondaryColor = c.polarize(primaryColor);
 
   properties.primary = properties.primary || ['background-color'];
   properties.secondary = properties.secondary || ['color'];
@@ -24,8 +21,8 @@ const changeColors = (elem, baseColor, properties={}) => {
     }
 
     if (!window.IMPORTANT.pause) {
-      primaryColor = colors.applyToHex(primaryColor, hsv);
-      secondaryColor = polarize(primaryColor);
+      primaryColor = c.applyToHex(primaryColor, hsv);
+      secondaryColor = c.polarize(primaryColor);
 
       properties.primary.forEach(p => $(elem, p, primaryColor))
       properties.secondary.forEach(s => $(elem, s, secondaryColor))

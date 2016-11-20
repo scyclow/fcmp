@@ -77,6 +77,10 @@ function isString(str) {
   return typeof str === 'string';
 }
 
+function isFunction(fn) {
+  return typeof fn === 'function';
+}
+
 function last(thing) {
   return thing[thing.length - 1];
 }
@@ -162,6 +166,7 @@ module.exports = {
   isBoolean,
   isArray,
   isString,
+  isFunction,
   floor,
   round,
   abs,

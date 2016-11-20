@@ -37,7 +37,7 @@ nav .nav-menu .nav-menu-item {
   align-items: center;
 }
 
-.box {
+.call-to-action {
   width: 400px;
   height: 200px;
 
@@ -52,7 +52,7 @@ nav .nav-menu .nav-menu-item {
   transition: margin 100ms, box-shadow 90ms;
 }
 
-.box > * {
+.call-to-action > * {
   display: flex;
   justify-content: center;
   align-items: center;

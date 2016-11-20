@@ -89,4 +89,18 @@ $.distanceFromCenter = (elem, event) => _.distance(
   event.coords || $.eventDimensions(event)
 );
 
+$.onHover = (fnEnter, fnLeave, element) => {
+  if (!_.isFunction(fnLeave) && !element) {
+    element = fnLeave;
+    fnLeave = null;
+  }
+
+  const clears = [
+    eventListener('mouseenter')(fnEnter, element),
+    fnLeave ? eventListener('mouseleave')(fnLeave, element) : _.noop
+  ];
+
+  return () => clears.forEach(_.runFn)
+}
+
 module.exports = $;
