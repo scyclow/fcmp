@@ -349,6 +349,9 @@ $.onHover = (fnEnter, fnLeave, element) => {
   return () => clears.forEach(_.runFn);
 };
 
+$.onClick = eventListener('click', true);
+
+window.$ = $;
 module.exports = $;
 
 /***/ },
@@ -747,7 +750,7 @@ exports = module.exports = __webpack_require__(7)();
 
 
 // module
-exports.push([module.i, "\n* { padding: 0; margin:0; }\n\nnav {\n  width: 100%;\n  min-height: 50px;\n  position: fixed;\n  border: 5px solid black;\n}\n\nnav .nav-header {\n  font-size: 30px;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  border-bottom: 5px solid black;\n}\n\nnav .nav-menu {\n  display: flex;\n}\n\nnav .nav-menu .nav-menu-item {\n  flex: 1;\n  min-height: 30px;\n  border-right: 5px solid black;\n\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n\n#hero-container {\n  height: 100vh;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n\n.call-to-action {\n  width: 400px;\n  height: 200px;\n\n  display: inline-block;\n  border: 5px solid black;\n  border-radius: 5px;\n\n  font-size: 30px;\n\n  cursor: pointer;\n\n  transition: margin 100ms, box-shadow 90ms;\n}\n\n.call-to-action > * {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  height: 100%;\n  width: 100%;\n}\n\n.shadow-change {\n  box-shadow: 20px 20px 20px #000;\n}\n\n.shadow-change:active {\n  margin-top: 10px;\n  margin-left: 10px;\n  box-shadow: 0 0 0 !important;\n}\n\n@media (max-width: 420px) {\n  nav .nav-header {\n    font-size: 25px;\n  }\n\n  .call-to-action {\n    width: 300px;\n    height: 150px;\n  }\n}\n", ""]);
+exports.push([module.i, "\n* { padding: 0; margin:0; }\n\nnav {\n  width: 100%;\n  min-height: 50px;\n  position: fixed;\n  border: 5px solid black;\n}\n\nnav .nav-header {\n  font-size: 30px;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  border-bottom: 5px solid black;\n}\n\nnav .nav-menu {\n  display: flex;\n}\n\nnav .nav-menu .nav-menu-item {\n  flex: 1;\n  min-height: 30px;\n  border-right: 5px solid black;\n\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n\n.hero-container {\n  height: 100vh;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n\n#call-to-action {\n  width: 400px;\n  height: 200px;\n\n  display: inline-block;\n  border: 5px solid black;\n  border-radius: 5px;\n\n  font-size: 30px;\n\n  cursor: pointer;\n\n  transition: margin 100ms, box-shadow 90ms;\n}\n\n#call-to-action > * {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  height: 100%;\n  width: 100%;\n}\n\n.shadow-change {\n  box-shadow: 20px 20px 20px #000;\n}\n\n.shadow-change:active {\n  margin-top: 10px;\n  margin-left: 10px;\n  box-shadow: 0 0 0 !important;\n}\n\n@media (max-width: 420px) {\n  nav .nav-header {\n    font-size: 25px;\n  }\n\n  #call-to-action {\n    width: 300px;\n    height: 150px;\n  }\n}\n", ""]);
 
 // exports
 
@@ -1102,6 +1105,10 @@ window.IMPORTANT = {
 $.onKeyPress(['p', 'P'])(() => window.IMPORTANT.pause = !window.IMPORTANT.pause);
 
 __webpack_require__(3);
+
+const callToAction = $.id('call-to-action');
+const signUpModal = $.id('signup-modal-container');
+$.onClick(() => setTimeout(() => $(signUpModal, 'margin-left', 0), 300), callToAction);
 
 /***/ }
 /******/ ]);
