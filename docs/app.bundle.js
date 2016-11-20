@@ -69,6 +69,8 @@
 /***/ function(module, exports) {
 
 "use strict";
+//  weak
+
 'use strict';
 
 const floor = Math.floor.bind(Math);
@@ -90,14 +92,14 @@ const atan = ratio => toDegree(Math.atan(ratio));
 const runFn = fn => fn();
 const noop = () => {};
 
-const degreeAroundCenter = (coords, center) => {
+function degreeAroundCenter(coords, center) {
   const x = center.x - coords.x;
   const y = center.y - coords.y;
 
   const rawDeg = atan(y / x);
 
   return x < 0 ? 180 + rawDeg : y < 0 ? 360 + rawDeg : rawDeg;
-};
+}
 
 const atMost = most => n => min(most, n);
 const atLeast = least => n => max(least, n);
@@ -135,12 +137,18 @@ function isString(str) {
   return typeof str === 'string';
 }
 
+function isFunction(fn) {
+  return typeof fn === 'function';
+}
+
 function last(thing) {
   return thing[thing.length - 1];
 }
 
 function random(i, j, k) {
-  if (isBoolean(k) && k) return floor(random(i, j));else if (isNumber(j)) return i + random(j - i);else if (isBoolean(j)) return floor(random(i));else if (isNumber(i)) return Math.random() * i;
+  if (isBoolean(k) && k) return floor(random(i, j));
+  // $FlowFixMe
+  else if (isNumber(j)) return i + random(j - i);else if (isBoolean(j)) return floor(random(i));else return Math.random() * i;
 }
 
 function betweenLinear(n, max, min) {
@@ -149,10 +157,6 @@ function betweenLinear(n, max, min) {
 
 function portion(max, center) {
   return (max - center) / (max + 1);
-}
-
-function last(thing) {
-  return thing[thing.length - 1];
 }
 
 function* timeGen(t = Infinity, fn = identity) {
@@ -215,6 +219,7 @@ module.exports = {
   isBoolean,
   isArray,
   isString,
+  isFunction,
   floor,
   round,
   abs,
@@ -247,6 +252,7 @@ module.exports = {
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
+//  weak
 
 const _ = __webpack_require__(0);
 
@@ -257,7 +263,7 @@ const keyDict = {
   p: 112
 };
 
-$ = (elem, prop, value) => elem.style[prop] = value;
+const $ = (elem, prop, value) => elem.style[prop] = value;
 
 $.qsa = document.querySelectorAll.bind(document);
 $.id = document.getElementById.bind(document);
@@ -268,10 +274,11 @@ $.eventDimensions = event => ({
   y: event.clientY + window.pageYOffset
 });
 
-const eventListener = eventType => (fn, element = document) => {
+const eventListener = (eventType, hasCoords) => (fn, element = document) => {
   const one = elem => {
-    elem.addEventListener(eventType, fn);
-    const clear = () => elem.removeEventListener(eventType, fn);
+    const listener = hasCoords ? $.coordsEvent(fn) : fn;
+    elem.addEventListener(eventType, listener);
+    const clear = () => elem.removeEventListener(eventType, listener);
     return clear;
   };
 
@@ -283,10 +290,10 @@ const eventListener = eventType => (fn, element = document) => {
   return element.length ? multiple(element) : one(element);
 };
 
-$.onMouseMove = eventListener('mousemove');
+$.onMouseMove = eventListener('mousemove', true);
 $.onHover = eventListener('mouseover');
-$.onOrient = fn => eventListener('deviceorientation')(fn, window);
-$.onResize = eventListener('resize');
+$.onOrient = fn => eventListener('deviceorientation')($.orientEvent(fn), window);
+$.onResize = eventListener('resize', true);
 
 const keypress = key => (fn, element) => eventListener('keypress')(event => {
   if (event.keyCode === keyDict[key]) return fn(event);
@@ -331,11 +338,24 @@ $.orientEvent = fn => event => {
 
 $.distanceFromCenter = (elem, event) => _.distance($.center(elem), event.coords || $.eventDimensions(event));
 
+$.onHover = (fnEnter, fnLeave, element) => {
+  if (!_.isFunction(fnLeave) && !element) {
+    element = fnLeave;
+    fnLeave = null;
+  }
+
+  const clears = [eventListener('mouseenter')(fnEnter, element), fnLeave ? eventListener('mouseleave')(fnLeave, element) : _.noop];
+
+  return () => clears.forEach(_.runFn);
+};
+
 module.exports = $;
 
 /***/ },
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
+
+//  weak
 
 const { between, wrap } = __webpack_require__(0);
 
@@ -372,19 +392,17 @@ function rgbToHsv({ r, g, b }) {
   const value = max;
   const saturation = max ? diff / max : 0;
 
-  let hue;
-  if (!diff) {
-    hue = 0;
-
-    // For some reason website says "mod 6". This returns wonky
-    // values, while + 6 appears to return the correct values.
-  } else if (r === max) {
-    hue = (g - b) / diff + 6;
-  } else if (g === max) {
-    hue = (b - r) / diff + 2;
-  } else if (b === max) {
-    hue = (r - g) / diff + 4;
-  }
+  let hue = 0;
+  if (!diff) {}
+  // For some reason website says "mod 6". This returns wonky
+  // values, while + 6 appears to return the correct values.
+  else if (r === max) {
+      hue = (g - b) / diff + 6;
+    } else if (g === max) {
+      hue = (b - r) / diff + 2;
+    } else if (b === max) {
+      hue = (r - g) / diff + 4;
+    }
 
   hue *= 60;
 
@@ -428,7 +446,7 @@ function hsvToRgb({ h, s, v }) {
 const hexToHsv = hex => rgbToHsv(hexToRgb(hex));
 const hsvToHex = hsv => rgbToHex(hsvToRgb(hsv));
 
-function applyToHex(hex, { h = 0, s = 0, v = 0 } = {}, mod = 1) {
+function applyToHex(hex, { h = 0, s = 0, v = 0 }, mod = 1) {
   let hsv = hexToHsv(hex);
   return hsvToHex({
     h: wrap(hsv.h + h / mod, 360),
@@ -457,6 +475,10 @@ function randHex() {
   return color.toUpperCase();
 }
 
+function polarize(hex) {
+  return applyToHex(hex, { h: 180 });
+}
+
 module.exports = {
   applyToHex,
   __experimental__: { setHsvOnHex },
@@ -466,7 +488,8 @@ module.exports = {
   numToHex,
   rgbToHex,
   rgbToHsv,
-  randHex
+  randHex,
+  polarize
 };
 
 /***/ },
@@ -490,14 +513,6 @@ const colorTimeChangers = $.cls('color-time-change');
 
 const baseSpeed = { distance: 600, time: 1 };
 
-// [{
-//   updateColorSpeed,
-//   updateCenter
-// }]
-const updaters = colorSwitchers.map(box => updateColorSpeedDistance(box, c.applyToHex('#ff0000', { h: _.random(360) }), baseSpeed, {
-  primary: ['background-color'],
-  secondary: ['color']
-}));
 const baseShadowRadius = 20;
 const orientAdjust = 10;
 
@@ -520,41 +535,64 @@ const updateBoxShadow = box => ({ coords }) => {
   $(box, 'box-shadow', boxShadowStyle);
 };
 
+// change box shadow when device orientation changes
+// beta -- forward backward tilt. 0 when flat on back, negative when backwards, converges at +/- 180 when flat upside down
+// alpha -- direction. roughly 360/0 when facing north
+// gamma -- side to side tilt. 0 when flat on either side. negative when left, postive when right (facing both sides), converges at 90
 const clearOrients = shadowChanges.map(box => {
   const update = updateBoxShadow(box);
 
-  return $.onOrient($.orientEvent(({ beta, gamma, absolute, alpha }) => {
+  return $.onOrient(({ beta, gamma, absolute, alpha }) => {
     const coords = {
       x: (gamma < 0 ? 90 + gamma : 90 - gamma) * orientAdjust,
       y: (90 - beta) * orientAdjust
     };
-    // beta -- forward backward tilt. 0 when flat on back, negative when backwards, converges at +/- 180 when flat upside down
-    // alpha -- direction. roughly 360/0 when facing north
-    // gamma -- side to side tilt. 0 when flat on either side. negative when left, postive when right (facing both sides), converges at 90
 
     update({ coords });
-  }));
-});
-
-$.onMouseMove(() => clearOrients.forEach(_.runFn));
-$.onMouseMove(event => updaters.map(updater => $.coordsEvent(updater.updateColorSpeed)(event)));
-$.onMouseMove(event => shadowChanges.map(box => $.coordsEvent(updateBoxShadow(box))(event)));
-
-colorTimeChangers.forEach(elem => {
-  let h = 1;
-
-  setInterval(() => changeColors(elem, '#ff0000')(h++), 20);
-});
-
-colorMouses.forEach(elem => {
-  changeColors(elem, '#ff0000')(_.random(360));
-  $.onMouseMove(event => {
-    const dist = $.distanceFromCenter(elem, event);
-    changeColors(elem, '#ff0000')(_.round(dist / 3));
   });
 });
 
+// remove orientation effects when there is a mouse event
+$.onMouseMove(() => clearOrients.forEach(_.runFn));
+
+const updaters = colorSwitchers.map(box => updateColorSpeedDistance(box, c.applyToHex('#ff0000', { h: _.random(360) }), baseSpeed, {
+  primary: ['background-color'],
+  secondary: ['color']
+}));
+
+// update color speed of element based on distace from mouse
+$.onMouseMove(event => updaters.map(updater => updater.updateColorSpeed(event)));
+
+// FIXME (onResize) -- update center of element on window resize
 $.onResize(() => updaters.forEach(({ updateCenter }) => updateCenter()));
+
+// change shadow angle and color depending mouse position relative to center of element
+$.onMouseMove(event => shadowChanges.map(box => updateBoxShadow(box)(event)));
+
+// continuously rotate element color
+colorTimeChangers.forEach(elem => {
+  let h = 1;
+  setInterval(() => changeColors(elem, '#ff0000')(h++), 20);
+});
+
+const baseButtonColor = c.polarize('#ff0000');
+
+// Color changes as mouse gets closer to center of element; polarizes on hover
+colorMouses.forEach(elem => {
+  // random color when there is no initial mouse
+  changeColors(elem, baseButtonColor)(_.random(360));
+
+  let isHovering;
+
+  $.onHover(enterEvent => isHovering = true, leaveEvent => isHovering = false, elem);
+
+  $.onMouseMove(event => {
+    const dist = $.distanceFromCenter(elem, event);
+    const hue = _.round(dist / 3);
+    const adj = isHovering ? 180 : 0;
+    changeColors(elem, baseButtonColor)(hue + adj);
+  });
+});
 
 /***/ },
 /* 4 */
@@ -573,6 +611,8 @@ const _ = __webpack_require__(0);
     clear: () => clears interval
   }
 */
+
+
 function dynamicInterval(fn) {
   let now = Date.now();
   let intervals = 0;
@@ -621,34 +661,33 @@ module.exports = dynamicInterval;
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
+//  weak
+
 'use strict';
 
 const $ = __webpack_require__(1);
 const _ = __webpack_require__(0);
-const colors = __webpack_require__(2);
+const c = __webpack_require__(2);
 const dynamicInterval = __webpack_require__(4);
 const atLeast1 = _.atLeast(1);
 
-const polarize = c => colors.applyToHex(c, { h: 180 });
-const updateHue = (c, h) => colors.applyToHex(c, { h });
-
 const changeColors = (elem, baseColor, properties = {}) => {
   let primaryColor = baseColor;
-  let secondaryColor = polarize(primaryColor);
+  let secondaryColor = c.polarize(primaryColor);
 
   properties.primary = properties.primary || ['background-color'];
   properties.secondary = properties.secondary || ['color'];
 
   return input => {
     const hsv = {
-      h: _.isNumber(input) ? input : input.h,
-      s: input.s,
-      v: input.v
+      h: typeof input === 'number' ? input : input.h,
+      s: typeof input === 'number' ? undefined : input.s,
+      v: typeof input === 'number' ? undefined : input.v
     };
 
     if (!window.IMPORTANT.pause) {
-      primaryColor = colors.applyToHex(primaryColor, hsv);
-      secondaryColor = polarize(primaryColor);
+      primaryColor = c.applyToHex(primaryColor, hsv);
+      secondaryColor = c.polarize(primaryColor);
 
       properties.primary.forEach(p => $(elem, p, primaryColor));
       properties.secondary.forEach(s => $(elem, s, secondaryColor));
@@ -660,7 +699,7 @@ const maxChange = 30;
 const baseDistance = 700;
 const baseTime = 15;
 
-const defaultOptions = { factor: 1.5 };
+const defaultOptions = { factor: 1.5, primary: undefined, secondary: undefined };
 
 function createSpeedSetter(elem, baseColor, { primary, secondary, factor = 1.5 } = defaultOptions) {
   const { set, clear } = dynamicInterval(changeColors(elem, baseColor, { primary, secondary }));
@@ -678,6 +717,8 @@ function createSpeedSetter(elem, baseColor, { primary, secondary, factor = 1.5 }
 }
 
 // create interface to update color speed and element center
+
+
 function updateColorSpeedDistance(elem, baseColor, baseSpeed) {
   let elemCenter = $.center(elem);
   const setSpeed = createSpeedSetter(elem, baseColor);
@@ -706,7 +747,7 @@ exports = module.exports = __webpack_require__(7)();
 
 
 // module
-exports.push([module.i, "\n* { padding: 0; margin:0; }\n\nnav {\n  width: 100%;\n  min-height: 50px;\n  position: fixed;\n  border: 5px solid black;\n}\n\nnav .nav-header {\n  font-size: 30px;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  border-bottom: 5px solid black;\n}\n\nnav .nav-menu {\n  display: flex;\n}\n\nnav .nav-menu .nav-menu-item {\n  flex: 1;\n  min-height: 30px;\n  border-right: 5px solid black;\n\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n\n#hero-container {\n  height: 100vh;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n\n.box {\n  width: 400px;\n  height: 200px;\n\n  display: inline-block;\n  border: 5px solid black;\n  border-radius: 5px;\n\n  font-size: 30px;\n\n  cursor: pointer;\n\n  transition: margin 100ms, box-shadow 90ms;\n}\n\n.box > * {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  height: 100%;\n  width: 100%;\n}\n\n.shadow-change {\n/*  margin-top: -10px;\n  margin-left: -10px;*/\n  box-shadow: 20px 20px 20px #000;\n}\n\n.shadow-change:active {\n  margin-top: 10px;\n  margin-left: 10px;\n  box-shadow: 0 0 0 !important;\n}\n", ""]);
+exports.push([module.i, "\n* { padding: 0; margin:0; }\n\nnav {\n  width: 100%;\n  min-height: 50px;\n  position: fixed;\n  border: 5px solid black;\n}\n\nnav .nav-header {\n  font-size: 30px;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  border-bottom: 5px solid black;\n}\n\nnav .nav-menu {\n  display: flex;\n}\n\nnav .nav-menu .nav-menu-item {\n  flex: 1;\n  min-height: 30px;\n  border-right: 5px solid black;\n\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n\n#hero-container {\n  height: 100vh;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n\n.call-to-action {\n  width: 400px;\n  height: 200px;\n\n  display: inline-block;\n  border: 5px solid black;\n  border-radius: 5px;\n\n  font-size: 30px;\n\n  cursor: pointer;\n\n  transition: margin 100ms, box-shadow 90ms;\n}\n\n.call-to-action > * {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  height: 100%;\n  width: 100%;\n}\n\n.shadow-change {\n  box-shadow: 20px 20px 20px #000;\n}\n\n.shadow-change:active {\n  margin-top: 10px;\n  margin-left: 10px;\n  box-shadow: 0 0 0 !important;\n}\n\n@media (max-width: 420px) {\n  nav .nav-header {\n    font-size: 25px;\n  }\n\n  .call-to-action {\n    width: 300px;\n    height: 150px;\n  }\n}\n", ""]);
 
 // exports
 
