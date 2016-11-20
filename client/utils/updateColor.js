@@ -1,3 +1,5 @@
+// @flow weak
+
 'use strict';
 
 const $ = require('./$');
@@ -6,18 +8,24 @@ const c = require('./colors');
 const dynamicInterval = require('./dynamicInterval');
 const atLeast1 = _.atLeast(1);
 
-const changeColors = (elem, baseColor, properties={}) => {
+type HSV = {
+  h?: number,
+  s?: number,
+  v?: number,
+};
+
+const changeColors = (elem: Element, baseColor: string, properties={}) => {
   let primaryColor = baseColor;
   let secondaryColor = c.polarize(primaryColor);
 
   properties.primary = properties.primary || ['background-color'];
   properties.secondary = properties.secondary || ['color'];
 
-  return (input) => {
+  return (input: number | HSV) => {
     const hsv = {
-      h: _.isNumber(input) ? input : input.h,
-      s: input.s,
-      v: input.v
+      h: typeof input === 'number' ? input : input.h,
+      s: typeof input === 'number' ? undefined : input.s,
+      v: typeof input === 'number' ? undefined : input.v
     }
 
     if (!window.IMPORTANT.pause) {
@@ -34,7 +42,7 @@ const maxChange = 30;
 const baseDistance = 700;
 const baseTime = 15;
 
-const defaultOptions = { factor: 1.5 };
+const defaultOptions = { factor: 1.5, primary: undefined, secondary: undefined };
 
 function createSpeedSetter (elem, baseColor, { primary, secondary, factor=1.5 } = defaultOptions) {
   const { set, clear } = dynamicInterval(changeColors(elem, baseColor, { primary, secondary }));
@@ -55,8 +63,19 @@ function createSpeedSetter (elem, baseColor, { primary, secondary, factor=1.5 } 
   }
 }
 
+
+
 // create interface to update color speed and element center
-function updateColorSpeedDistance(elem, baseColor, baseSpeed) {
+type ColorSpeedUpdater = {
+  updateColorSpeed: (coordinates: { coords: { x: number, y: number } }) => void,
+  updateCenter: () => void
+};
+
+function updateColorSpeedDistance(
+  elem: Element,
+  baseColor: string,
+  baseSpeed: { distance: number, time: number}
+): ColorSpeedUpdater {
   let elemCenter = $.center(elem);
   const setSpeed = createSpeedSetter(elem, baseColor);
   setSpeed(baseSpeed.distance, baseSpeed.time);

@@ -1,3 +1,5 @@
+// @flow
+
 'use strict';
 
 require('./index.css');
@@ -15,16 +17,6 @@ const colorTimeChangers = $.cls('color-time-change');
 
 const baseSpeed = { distance: 600, time: 1 };
 
-// [{
-//   updateColorSpeed,
-//   updateCenter
-// }]
-const updaters = colorSwitchers.map(box =>
-  updateColorSpeedDistance(box, c.applyToHex('#ff0000', { h: _.random(360) }), baseSpeed, {
-    primary: ['background-color'],
-    secondary: ['color']
-  })
-);
 const baseShadowRadius = 20;
 const orientAdjust = 10;
 
@@ -54,33 +46,37 @@ const updateBoxShadow = box => ({ coords }) => {
 const clearOrients = shadowChanges.map(box => {
   const update = updateBoxShadow(box);
 
-  return $.onOrient(
-    $.orientEvent(({ beta, gamma, absolute, alpha }) => {
-      const coords = {
-        x: ((gamma < 0) ? (90 + gamma) : (90 - gamma)) * orientAdjust,
-        y: (90 - beta) * orientAdjust
-      };
+  return $.onOrient(({ beta, gamma, absolute, alpha }) => {
+    const coords = {
+      x: ((gamma < 0) ? (90 + gamma) : (90 - gamma)) * orientAdjust,
+      y: (90 - beta) * orientAdjust
+    };
 
-      update({ coords });
-    })
-  )
+    update({ coords });
+  })
 });
 
 // remove orientation effects when there is a mouse event
 $.onMouseMove(() => clearOrients.forEach(_.runFn));
 
+const updaters = (colorSwitchers.map(box =>
+  updateColorSpeedDistance(box, c.applyToHex('#ff0000', { h: _.random(360) }), baseSpeed, {
+    primary: ['background-color'],
+    secondary: ['color']
+  })
+): Array<{
+  updateColorSpeed: Function,
+  updateCenter: Function
+}>);
+
 // update color speed of element based on distace from mouse
-$.onMouseMove((event) => updaters.map(updater =>
-  $.coordsEvent(updater.updateColorSpeed)(event)
-));
+$.onMouseMove((event) => updaters.map(updater => updater.updateColorSpeed(event)));
 
 // FIXME (onResize) -- update center of element on window resize
 $.onResize(() => updaters.forEach(({ updateCenter }) => updateCenter()));
 
 // change shadow angle and color depending mouse position relative to center of element
-$.onMouseMove(event => shadowChanges.map(box =>
-  $.coordsEvent( updateBoxShadow(box) )(event)
-));
+$.onMouseMove(event => shadowChanges.map(box => updateBoxShadow(box)(event)));
 
 // continuously rotate element color
 colorTimeChangers.forEach(elem => {

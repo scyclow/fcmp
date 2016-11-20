@@ -12,7 +12,15 @@ const _ = require('./_');
     clear: () => clears interval
   }
 */
-function dynamicInterval(fn) {
+type SetterFn = (time: number, ...setterArgs: Array<any>) => void;
+type ClearingFn = () => void;
+
+type DynamicIntervalController = {
+  set: SetterFn,
+  clear: ClearingFn
+};
+
+function dynamicInterval(fn: Function): DynamicIntervalController {
   let now = Date.now();
   let intervals = 0
   let interval, timeout;
@@ -23,7 +31,7 @@ function dynamicInterval(fn) {
     interval = setInterval(execute, time);
   }
 
-  const set = (time, ...setArgs) => {
+  const set= (time, ...setArgs) => {
     time = _.round(time);
 
     // execute fn with setArgs,

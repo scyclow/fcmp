@@ -1,3 +1,5 @@
+// @flow weak
+
 'use strict';
 
 const floor = Math.floor.bind(Math);
@@ -6,21 +8,21 @@ const abs = Math.abs.bind(Math);
 const max = Math.max.bind(Math);
 const min = Math.min.bind(Math);
 
-const toRadian = (degree) => degree * (Math.PI / 180);
-const toDegree = (radian) => (radian * 180) / Math.PI;
+const toRadian = (degree: number) => degree * (Math.PI / 180);
+const toDegree = (radian: number) => (radian * 180) / Math.PI;
 
-const sin = (deg) => Math.sin(toRadian(deg));
-const cos = (deg) => Math.cos(toRadian(deg));
-const tan = (deg) => Math.tan(toRadian(deg));
-const asin = (ratio) => toDegree(Math.asin(ratio));
-const acos = (ratio) => toDegree(Math.acos(ratio));
-const atan = (ratio) => toDegree(Math.atan(ratio));
+const sin = (deg: number) => Math.sin(toRadian(deg));
+const cos = (deg: number) => Math.cos(toRadian(deg));
+const tan = (deg: number) => Math.tan(toRadian(deg));
+const asin = (ratio: number) => toDegree(Math.asin(ratio));
+const acos = (ratio: number) => toDegree(Math.acos(ratio));
+const atan = (ratio: number) => toDegree(Math.atan(ratio));
 
-const runFn = fn => fn();
+const runFn = (fn: Function) => fn();
 const noop = () => {};
 
-
-const degreeAroundCenter = (coords, center) => {
+type Coords = { x: number, y: number };
+function degreeAroundCenter(coords: Coords, center: Coords): number {
   const x = center.x - coords.x;
   const y = center.y - coords.y;
 
@@ -34,30 +36,30 @@ const degreeAroundCenter = (coords, center) => {
 }
 
 
-const atMost = most => n => min(most, n);
-const atLeast = least => n => max(least, n);
+const atMost = (most: number) => (n: number): number => min(most, n);
+const atLeast = (least: number) => (n: number): number => max(least, n);
 const isArray = Array.isArray.bind(Array);
 
 
-function betweenLinear(n, high, low) {
+function betweenLinear(n: number, high: number, low: number): number {
   return low + ((high - low) * n);
 }
 
-function portion(high, middle) {
+function portion(high: number, middle: number): number {
   return (high - middle) / high;
 }
 
-function identity(arg) {
+function identity<T>(arg: T): T {
   return arg;
 }
 
-function between(n, high, low) {
+function between(n: number, high: number, low: number): number {
   return max(
     min(n, high), low
   );
 }
 
-function wrap(number, max) {
+function wrap(number: number, max: number): number {
   return (
     number >= max ? wrap(number - max, max) :
     number < 0    ? wrap(max + number, max) :
@@ -65,57 +67,54 @@ function wrap(number, max) {
   );
 }
 
-function isNumber(num) {
+function isNumber(num: any): boolean {
   return typeof num === 'number';
 }
 
-function isBoolean(bool) {
+function isBoolean(bool: any): boolean {
   return typeof bool === 'boolean';
 }
 
-function isString(str) {
+function isString(str: any): boolean {
   return typeof str === 'string';
 }
 
-function isFunction(fn) {
+function isFunction(fn: any): boolean {
   return typeof fn === 'function';
 }
 
-function last(thing) {
+function last(thing: Array<any> | string) {
   return thing[thing.length - 1];
 }
 
-function random(i, j, k) {
+function random(i: number, j: number | boolean | void, k: boolean | void): number {
   if (isBoolean(k) && k) return floor(random(i, j))
+  // $FlowFixMe
   else if (isNumber(j))  return i + random(j - i)
   else if (isBoolean(j)) return floor(random(i))
-  else if (isNumber(i))  return Math.random() * i
+  else                   return Math.random() * i
 }
 
-function betweenLinear(n, max, min) {
+function betweenLinear(n: number, max: number, min: number): number {
   return min + ((max - min) * n);
 }
 
-function portion(max, center) {
+function portion(max: number, center: number): number {
   return (max - center) / (max+1);
 }
 
-function last(thing) {
-  return thing[thing.length - 1];
-}
 
-
-function *timeGen(t=Infinity, fn=identity) {
+function *timeGen(t: number=Infinity, fn=identity) {
   for (let i = 0; i < t; i++) yield fn(i);
 }
 
-function times(t, fn = identity) {
+function times(t: number, fn = identity): Array<any> {
   let output = [];
   for (let i of timeGen(t)) output.push(fn(i));
   return output;
 }
 
-function compact(arr) {
+function compact(arr: Array<any>): Array<any> {
   return arr.filter(i => !!i || i === 0);
 }
 
@@ -136,7 +135,7 @@ function* enumerate(iterable) {
   yield* iterable[Symbol.iterator] ? enumerateArray(iterable) : enumerateObject(iterable);
 }
 
-function find(iterable, fn) {
+function find<T>(iterable: Array<T>, fn): T | null {
   for (let [iter, i] of enumerate(iterable)) {
     if (fn(iter, i)) return iter;
   }
@@ -144,11 +143,11 @@ function find(iterable, fn) {
   return null;
 }
 
-function compose(...fnArr) {
+function compose(...fnArr: Array<Function>): Function {
   return (...args) => fnArr.slice(1).reduce((acc, fn) => fn(acc), fnArr[0](...args));
 }
 
-function distance(a, b) {
+function distance(a: Coords, b: Coords): number {
   const xDiff = abs(a.x - b.x);
   const yDiff = abs(a.y - b.y);
   return ((xDiff ** 2) + (yDiff ** 2)) ** 0.5;

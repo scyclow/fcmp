@@ -1,3 +1,5 @@
+// @flow weak
+
 const { between, wrap } = require('./_');
 
 function numToHex(num) {
@@ -34,19 +36,17 @@ function rgbToHsv({r, g, b}) {
   const value = max;
   const saturation = max ? diff / max : 0;
 
-  let hue;
-  if (!diff) {
-    hue = 0;
-
+  let hue = 0;
+  if (!diff) {}
   // For some reason website says "mod 6". This returns wonky
   // values, while + 6 appears to return the correct values.
-  } else if (r === max) {
+  else if (r === max) {
     hue = ((g - b) / diff) + 6;
-
-  } else if (g === max) {
+  }
+  else if (g === max) {
     hue = ((b - r) / diff) + 2;
-
-  } else if (b === max) {
+  }
+  else if (b === max) {
     hue = ((r - g) / diff) + 4;
   }
 
@@ -92,7 +92,13 @@ function hsvToRgb({ h, s, v }) {
 const hexToHsv = (hex) => rgbToHsv( hexToRgb(hex) );
 const hsvToHex = (hsv) => rgbToHex( hsvToRgb(hsv) );
 
-function applyToHex(hex, {h=0, s=0, v=0} = {}, mod=1) {
+type HSV = {
+  h?: number,
+  s?: number,
+  v?: number
+};
+
+function applyToHex(hex: string, {h=0, s=0, v=0}: HSV, mod=1): string {
   let hsv = hexToHsv(hex);
   return hsvToHex({
     h:    wrap(hsv.h + (h / mod), 360),

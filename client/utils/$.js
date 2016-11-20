@@ -1,3 +1,4 @@
+// @flow weak
 
 const _ = require('./_');
 
@@ -8,7 +9,7 @@ const keyDict = {
   p: 112
 };
 
-$ = (elem, prop, value) => elem.style[prop] = value;
+const $ = (elem, prop, value) => elem.style[prop] = value;
 
 $.qsa = document.querySelectorAll.bind(document);
 $.id = document.getElementById.bind(document);
@@ -20,10 +21,11 @@ $.eventDimensions = (event) => ({
 });
 
 
-const eventListener = (eventType) => (fn, element = document) => {
+const eventListener = (eventType, hasCoords) => (fn, element = document) => {
   const one = (elem) => {
-    elem.addEventListener(eventType, fn);
-    const clear = () => elem.removeEventListener(eventType, fn);
+    const listener = hasCoords ? $.coordsEvent(fn) : fn
+    elem.addEventListener(eventType, listener);
+    const clear = () => elem.removeEventListener(eventType, listener);
     return clear;
   };
 
@@ -37,10 +39,10 @@ const eventListener = (eventType) => (fn, element = document) => {
     : one(element);
 }
 
-$.onMouseMove = eventListener('mousemove');
+$.onMouseMove = eventListener('mousemove', true);
 $.onHover = eventListener('mouseover');
-$.onOrient = (fn) => eventListener('deviceorientation')(fn, window);
-$.onResize = eventListener('resize');
+$.onOrient = (fn) => eventListener('deviceorientation')($.orientEvent(fn), window);
+$.onResize = eventListener('resize', true);
 
 const keypress = (key) => (fn, element) => eventListener('keypress')((event) => {
   if (event.keyCode === keyDict[key]) return fn(event);
