@@ -106,3 +106,4 @@ colorMouses.forEach(elem => {
     changeColors(elem, baseButtonColor)(hue + adj)
   })
 });
+
