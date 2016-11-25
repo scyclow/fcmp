@@ -3,8 +3,8 @@ const _ = require('lodash');
 const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
 
-const { encryptPassword, validatePassword } = require('../utils/verification');
-const { createAccountCode } = require('../utils/createAccountCode');
+const verification = require('../utils/verification');
+const { createAddress } = require('../utils/createAddress');
 
 const UserSchema = new Schema({
   email: {
@@ -12,23 +12,17 @@ const UserSchema = new Schema({
     unique: true,
     lowercase: true
   },
-  username: {
-    type: String,
-    unique: true,
-    required: true,
-    lowercase: true
-  },
-  password: {
+  pin: {
     type: String,
     required: true
   },
-  accountCode: {
+  address: {
     type: String,
-    default: createAccountCode,
+    default: createAddress,
     unique: true,
     index: true
   },
-  fastCashBalance: {
+  balance: {
     type: Number,
     default: 1
   },
@@ -50,25 +44,25 @@ const UserSchema = new Schema({
   }
 });
 
-UserSchema.pre('save', function (next) {
-  if (!this.isModified('password')) return next();
+UserSchema.pre('save', function updatePin (next) {
+  if (!this.isModified('pin')) return next();
 
-  encryptPassword(this.password)
+  verification.encrypt(this.pin)
     .then(hash => {
-      this.password = hash;
+      this.pin = hash;
       next();
     })
     .catch(next)
 });
 
 UserSchema.methods = {
-  passwordValid (password) {
-    return validatePassword(this, password);
+  pinValid (pin) {
+    return verification.validate(pin, this.pin);
   },
 
   async makeFastCash (amount, ignoreComission) {
     const updateBalance = async () => {
-      this.fastCashBalance += Number(amount);
+      this.balance += Number(amount);
       return this.save();
     };
 
@@ -97,11 +91,11 @@ UserSchema.methods = {
   },
 
   async transfer(account, amount) {
-    if (this.fastCashBalance < amount) throw new Error(
-      `${this.username} does not have enough fastcash for this tansaction`
+    if (this.balance < amount) throw new Error(
+      `${this.address} does not have enough fastcash for this tansaction`
     );
 
-    const payee = await this.model('User').findByAccountCode(account);
+    const payee = await this.model('User').findByAddress(account);
 
     await Promise.all([
       payee.makeFastCash(amount, true),
@@ -109,32 +103,41 @@ UserSchema.methods = {
     ]);
 
     return {
-      payer: _.pick(this, ['username', 'fastCashBalance']),
-      payee: _.pick(payee, ['username', 'fastCashBalance']),
+      payer: _.pick(this, ['address', 'balance']),
+      payee: _.pick(payee, ['address', 'balance']),
     };
   }
 };
 
 UserSchema.statics = {
-  async validateUser(identifier, password) {
+  async validateUser(identifier, pin) {
+    if (!pin) throw new Error('pin is required');
+
     const user = await this.findOne(identifier);
     if (!user) throw new Error(`User with ${JSON.stringify(identifier)} does not exist.`);
 
-    const isValid = await user.passwordValid(password);
-    if (!isValid) throw new Error('Password is invalid.');
+    const isValid = await user.pinValid(pin);
+    if (!isValid) throw new Error('pin is invalid.');
 
     return user;
   },
 
-  async findByToken(decoded) {
-    const user = await this.findOne(decoded._doc);
-    if (!user) throw new Error(`User does not exist: ${decoded._doc}`);
+  async findByToken(token) {
+    const decrypted = await verification.verifyJWT(token);
+    const address = decrypted.address;
+    if (!address) throw new Error(`Address does not exist for: ${JSON.stringify(decrypted)}`);
+
+    const user = await this.findOne({ address });
+    if (!user) throw new Error(`User does not exist: ${JSON.stringify(address)}`);
 
     return user;
   },
 
-  findByAccountCode(accountCode) {
-    return this.findOne({ accountCode });
+  async findByAddress(address) {
+    const user = await this.findOne({ address });
+    if (!user) throw new Error(`Cannot find user with address: ${address}`);
+
+    return user;
   }
 }
 

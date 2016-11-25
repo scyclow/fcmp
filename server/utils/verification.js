@@ -2,29 +2,28 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { SECRET } = require('../../config/env');
 
-function encryptPassword(password) {
+function encrypt(data) {
   return new Promise((resolve, reject) => {
     const saltRounds = 10;
-    bcrypt.hash(password, saltRounds, (err, hash) => {
+    bcrypt.hash(data, saltRounds, (err, hash) => {
       if (err) reject(err);
       else resolve(hash);
     });
   });
 }
 
-function validatePassword(user, _password) {
+function validate(decrypted, encrypted) {
   return new Promise((resolve, reject) => {
-    bcrypt.compare(_password, user.password, (err, isMatch) => {
+    bcrypt.compare(decrypted, encrypted, (err, isMatch) => {
       if (err) reject(err)
       else resolve(isMatch);
     });
   });
 }
 
-function signJWT(user) {
+function signJWT(data) {
   return new Promise((resolve, reject) => {
-    const { accountCode } = user;
-    jwt.sign({ accountCode }, SECRET, {}, (err, token) => {
+    jwt.sign(data, SECRET, {}, (err, token) => {
       if (err) reject(new Error('JWT not created'));
       else resolve(token);
     });
@@ -40,4 +39,4 @@ function verifyJWT(token) {
   });
 }
 
-module.exports = { verifyJWT, signJWT, encryptPassword, validatePassword };
+module.exports = { verifyJWT, signJWT, encrypt, validate };

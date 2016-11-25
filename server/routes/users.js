@@ -7,7 +7,7 @@ const router = Router();
 router.get('/', users.find);
 
 // should only work if authenticated
-router.get('/:accountCode', auth.validate, users.findOne);
+router.get('/:address/:token', auth.validate, users.findOne);
 router.post('/transfer', auth.validate, users.transfer)
 
 
@@ -15,9 +15,10 @@ router.post('/transfer', auth.validate, users.transfer)
 if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
   const User = require('../models/User');
 
-  router.post('/makeFastCash/:accountCode/:amount', (req, res) => {
-    const { accountCode, amount } = req.params;
-    User.findByAccountCode(accountCode)
+  router.post('/makeFastCash/:address/:amount', (req, res) => {
+    const { address, amount } = req.params;
+
+    User.findByAddress(address)
       .then(user => user.makeFastCash(amount))
       .then(user => res.send(user))
       .catch(err => {

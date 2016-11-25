@@ -1,9 +1,9 @@
-const createDummyData = require('./dummyData');
+require('babel-register');
+const createDummyData = require('./createDummyData');
 
 const email = 'spike716@gmail.com';
 createDummyData({ email }, {
   email,
-  username: 'steviep',
-  password: 'Password1'
+  pin: 'Password1'
 });
 

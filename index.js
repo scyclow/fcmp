@@ -1,4 +1,6 @@
+console.log('Starting server');
 require('babel-register');
+console.log('Babel complete');
 
 const express = require('express');
 const config = require('./config/env');
@@ -13,10 +15,7 @@ require('./server/routes')(app);
 const port = config.PORT;
 const env = process.env.NODE_ENV || 'development';
 
-if (env === 'development') {
-  require('pretty-error').start();
-  require('./client/devServer');
-}
+if (env === 'development') require('pretty-error').start();
 
 const startServer = () => app.listen(port, (err) => {
   if (err) throw new Error(`Something went wrong with express: ${err}`);
@@ -31,5 +30,8 @@ connectMongo
     console.error(err);
     process.exit();
   });
+
+if (env === 'development') require('./client/devServer');
+
 
 module.exports = app;

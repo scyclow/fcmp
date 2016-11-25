@@ -8,7 +8,7 @@
     "debug": "node --inspect index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --config client/build/webpack.dev.config.js",
-    "dummyData": "node ./scripts/createDummyData.js",
+    "dummyData": "node ./scripts/_populateDummyData.js",
     "production": "npm install && NODE_ENV=production node index.js"
   },
   "engines": {

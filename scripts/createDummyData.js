@@ -1,40 +1,29 @@
-const createDummyData = require('./dummyData');
 const _ = require('lodash');
-const { ObjectId } = require('mongoose').Types;
+const User = require('../server/models/User');
 
-// PARENT TREE
-// Steve
-//   Mike
-//   Joe
-//     Sarah
-//     Emily
-//   Carl
-//     Rebecca
-//     Brian
-//       Amanda
-//         Alex
-const userData = [
-  { name: 'steve' },
-  { name: 'carl', parent: 'steve' },
-  { name: 'joe', parent: 'steve' },
-  { name: 'mike', parent: 'steve' },
-  { name: 'brian', parent: 'carl' },
-  { name: 'rebecca', parent: 'carl' },
-  { name: 'sarah', parent: 'joe' },
-  { name: 'emily', parent: 'joe' },
-  { name: 'amanda', parent: 'brian' },
-  { name: 'alex', parent: 'amanda' }
-]
-.map(user => ({ ...user, _id: new ObjectId() }))
-.map((user, i, users) => {
-  const parent = _.find(users, { name: user.parent });
-  return { ...user, parent: parent && parent._id };
-})
-.map(user => ({
-  ...user,
-  email: `${user.name}@fast.plus`,
-  username: _.capitalize(user.name),
-  password: '1234'
-}));
+const connectMongo = require('../config/mongoose');
 
-createDummyData({}, userData);
+const cleanDB = (criteria = {}) => () => User.remove(criteria);
+const createUsers = (userData) => () => userData.map(user => User.create(user));
+const logUser = (user) => console.log(`Creating user: ${JSON.stringify(user, null, 3)}`);
+const verifyUsers = (usersCreated) => Promise.all(
+  usersCreated.map(user => user.then(logUser))
+);
+
+const createDummyData = (remove, userData) => {
+  if (!_.isArray(userData)) {
+    userData = [userData];
+  }
+
+  return connectMongo
+    .then(cleanDB(remove))
+    .then(createUsers(userData))
+    .then(verifyUsers)
+    .then(process.exit)
+    .catch(err => {
+      console.error(`Error creating dummy data: ${err}`);
+      process.exit();
+    });
+}
+
+module.exports = createDummyData;

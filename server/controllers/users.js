@@ -3,7 +3,6 @@ const User = require('../models/User');
 function find(req, res) {
   User.find({})
     .then(users => {
-      console.log(users);
       res.send(users);
     })
     .catch(err => {
@@ -13,12 +12,11 @@ function find(req, res) {
 }
 
 function findOne(req, res) {
-  const { accountCode } = req.params;
+  const { address } = req.params;
 
-  User.findByAccountCode(accountCode)
+  User.findByAddress(address)
     .then(user => {
-      console.log(`User ID ${accountCode}`, user);
-      res.send({ accountCode, requested: user.username, verified: req.user.username });
+      res.send({ address, requested: user.address, verified: req.user.address });
     })
     .catch(err => {
       console.error('Something went wrong:', err);

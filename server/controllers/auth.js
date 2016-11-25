@@ -2,10 +2,10 @@ const User = require('../models/User');
 const { signJWT, verifyJWT } = require('../utils/verification');
 
 function authenticate (req, res) {
-  const { email, password } = req.body;
+  const { email, pin } = req.body;
 
-  User.validateUser({ email }, password)
-    .then(signJWT)
+  User.validateUser({ email }, pin)
+    .then(user => signJWT({ address: user.address }))
     .then(token => res.send({ token, success: true }))
     .catch(error => {
       console.error('Something went wrong:', error);
@@ -14,11 +14,10 @@ function authenticate (req, res) {
 }
 
 function validate (req, res, next) {
-  const token = req.body.token || req.query.token || req.headers['x-access-token'];
+  const token = req.params.token || req.body.token || req.query.token || req.headers['x-access-token'];
 
   if (token) {
-    verifyJWT(token)
-      .then(decoded => User.findByToken(decoded))
+    User.findByToken(token)
       .then(user => {
         req.user = user;
         next();

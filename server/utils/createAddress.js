@@ -35,7 +35,7 @@ function makeHash(min, max) {
     .slice(0, _.random(min, max));
 }
 
-function createAccountCode() {
+function createAddress() {
   const hash = makeHash(8, 15);
 
   return [
@@ -45,4 +45,4 @@ function createAccountCode() {
   ].join('');
 }
 
-module.exports = { createAccountCode, makeHash };
+module.exports = { createAddress, makeHash };
