@@ -1,6 +1,6 @@
-console.log('Starting server');
+console.log('Starting server', new Date());
 require('babel-register');
-console.log('Babel complete');
+console.log('Babel complete', new Date());
 
 const express = require('express');
 const config = require('./config/env');
@@ -20,6 +20,7 @@ if (env === 'development') require('pretty-error').start();
 const startServer = () => app.listen(port, (err) => {
   if (err) throw new Error(`Something went wrong with express: ${err}`);
 
+  console.log('Server started', new Date());
   console.log(`App listening on port ${port}`);
   console.log(`Running NODE_ENV: ${env}`);
 });

@@ -1,5 +1,6 @@
 const auth = require('../controllers/auth');
 const users = require('./users');
+const accounts = require('./accounts');
 
 module.exports = (app) => {
   app.get('/', (req, res) => {
@@ -7,5 +8,6 @@ module.exports = (app) => {
   });
 
   app.use('/api/users', users);
+  app.use('/api/accounts', accounts);
   app.post('/api/authenticate', auth.authenticate);
 };

@@ -8,7 +8,8 @@ router.get('/', users.find);
 
 // should only work if authenticated
 router.get('/:address/:token', auth.validate, users.findOne);
-router.post('/transfer', auth.validate, users.transfer)
+router.post('/transfer', auth.validate, users.transfer);
+router.post('/', users.create);
 
 
 // TESTING

@@ -29,11 +29,19 @@ function transfer(req, res) {
   const payer = req.user;
 
   payer.transfer(recipientAccount, amount)
-    .then(status => res.send(status))
+    .then(status => res.status(status))
     .catch(err => {
       console.error(err);
       res.send(err.message)
     });
 }
 
-module.exports = { find, findOne, transfer };
+function create(req, res) {
+  const { email, pin } = req.body;
+  console.log(email, pin)
+  User.create({ email, pin })
+    .then(user => res.send(user))
+    .catch(error => res.status(500).send(error))
+}
+
+module.exports = { find, findOne, transfer, create };

@@ -56,8 +56,12 @@ UserSchema.pre('save', function updatePin (next) {
 });
 
 UserSchema.methods = {
-  pinValid (pin) {
+  async pinValid (pin) {
     return verification.validate(pin, this.pin);
+  },
+
+  async createToken() {
+    return verification.signJWT({ address: this.address });
   },
 
   async makeFastCash (amount, ignoreComission) {
@@ -81,21 +85,21 @@ UserSchema.methods = {
     return this;
   },
 
-  getParent () {
+  async getParent () {
     return this.model('User').findOne({ _id: this.parent });
   },
 
-  getChildren (populate) {
+  async getChildren (populate) {
     const query = this.model('User').findOne({ parent: this._id });
     return populate ? query : query.select('_id');
   },
 
-  async transfer(account, amount) {
+  async transfer(payeeAddress, amount) {
     if (this.balance < amount) throw new Error(
       `${this.address} does not have enough fastcash for this tansaction`
     );
 
-    const payee = await this.model('User').findByAddress(account);
+    const payee = await this.model('User').findByAddress(payeeAddress);
 
     await Promise.all([
       payee.makeFastCash(amount, true),
@@ -127,10 +131,7 @@ UserSchema.statics = {
     const address = decrypted.address;
     if (!address) throw new Error(`Address does not exist for: ${JSON.stringify(decrypted)}`);
 
-    const user = await this.findOne({ address });
-    if (!user) throw new Error(`User does not exist: ${JSON.stringify(address)}`);
-
-    return user;
+    return this.findByAddress(address);
   },
 
   async findByAddress(address) {

@@ -15,7 +15,22 @@ const keyWords = [
   'fuck',
   'opportunity',
   'digital',
-  'dream'
+  'dream',
+  'energy',
+  'spirit',
+  'pure',
+  'clean',
+  'plus',
+  'advanced',
+  'electric',
+  'freedom',
+  'life',
+  'death',
+  'accumulation',
+  'easy',
+  'fear',
+  'destiny',
+  'believe'
 ];
 
 function randInsert (original, content) {
