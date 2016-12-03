@@ -59,15 +59,17 @@ const clearOrients = shadowChanges.map(box => {
 // remove orientation effects when there is a mouse event
 $.onMouseMove(() => clearOrients.forEach(_.runFn));
 
-const updaters = (colorSwitchers.map(box =>
+type ColorUpdator = {
+  updateColorSpeed: Function,
+  updateCenter: Function
+};
+
+const updaters: Array<ColorUpdator> = colorSwitchers.map(box =>
   updateColorSpeedDistance(box, c.applyToHex('#ff0000', { h: _.random(360) }), baseSpeed, {
     primary: ['background-color'],
     secondary: ['color']
   })
-): Array<{
-  updateColorSpeed: Function,
-  updateCenter: Function
-}>);
+);
 
 // update color speed of element based on distace from mouse
 $.onMouseMove((event) => updaters.map(updater => updater.updateColorSpeed(event)));

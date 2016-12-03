@@ -153,6 +153,23 @@ function distance(a: Coords, b: Coords): number {
   return ((xDiff ** 2) + (yDiff ** 2)) ** 0.5;
 }
 
+function set(obj, prop, val) {
+  obj[prop] = val;
+  return obj;
+}
+
+function pick(obj, props) {
+  return props.reduce((output, prop) => set(output, prop, obj[prop]), {});
+}
+
+function extend(obj1, obj2) {
+  for (let [key, val] of enumerateObject(obj2)) {
+    obj1[key] = val
+  }
+
+  return obj1;
+}
+
 
 module.exports = {
   between,
@@ -182,6 +199,9 @@ module.exports = {
   distance,
   runFn,
   noop,
+  set,
+  pick,
+  extend,
 
   sin,
   cos,
