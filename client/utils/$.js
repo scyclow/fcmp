@@ -21,7 +21,7 @@ $.eventDimensions = (event) => ({
 });
 
 
-const eventListener = (eventType, hasCoords) => (fn, element = document) => {
+const eventListener = (eventType, hasCoords) => (element = document) => (fn) => {
   const one = (elem) => {
     const listener = hasCoords ? $.coordsEvent(fn) : fn
     elem.addEventListener(eventType, listener);
@@ -41,12 +41,12 @@ const eventListener = (eventType, hasCoords) => (fn, element = document) => {
 
 $.onMouseMove = eventListener('mousemove', true);
 $.onHover = eventListener('mouseover');
-$.onOrient = (fn) => eventListener('deviceorientation')($.orientEvent(fn), window);
+$.onOrient = (fn) => eventListener('deviceorientation')(window)($.orientEvent(fn));
 $.onResize = eventListener('resize', true);
 
-const keypress = (key) => (fn, element) => eventListener('keypress')((event) => {
+const keypress = (key) => (fn, element) => eventListener('keypress')(element)((event) => {
   if (event.keyCode === keyDict[key]) return fn(event);
-}, element);
+});
 
 // key: string | Array<string>
 // => clearing function
@@ -91,21 +91,26 @@ $.distanceFromCenter = (elem, event) => _.distance(
   event.coords || $.eventDimensions(event)
 );
 
-$.onHover = (fnEnter, fnLeave, element) => {
+$.onHover = (element) => (fnEnter, fnLeave) => {
   if (!_.isFunction(fnLeave) && !element) {
     element = fnLeave;
     fnLeave = null;
   }
 
   const clears = [
-    eventListener('mouseenter')(fnEnter, element),
-    fnLeave ? eventListener('mouseleave')(fnLeave, element) : _.noop
+    eventListener('mouseenter')(element)(fnEnter),
+    fnLeave ? eventListener('mouseleave')(element)(fnLeave) : _.noop
   ];
 
   return () => clears.forEach(_.runFn)
 };
 
 $.onClick = eventListener('click', true);
+
+$.window = {
+  get width() { return window.innerWidth },
+  get height() { return window.innerHeight }
+}
 
 window.$ = $;
 module.exports = $;

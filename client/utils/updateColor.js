@@ -2,7 +2,6 @@
 
 'use strict';
 
-const $ = require('./$');
 const _ = require('./_');
 const c = require('./colors');
 const dynamicInterval = require('./dynamicInterval');

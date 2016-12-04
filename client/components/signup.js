@@ -17,21 +17,18 @@ const modalHeight = `calc(100vh - ${navHeight}`;
 $(signUpModal, 'height', modalHeight)
 
 // display modal when call to action is clicked
-$.onClick(
-  () => setTimeout(
-    () => $(signUpModal, 'margin-top', '-75px'),
-    300
-  ),
-  callToAction
-);
+$.onClick(callToAction)(() => setTimeout(
+  () => $(signUpModal, 'margin-top', '-75px'),
+  300
+));
 
 
 // Hide modal when clickin background
-$.onClick(() => {
+$.onClick(signUpModalBackground)(() => {
 
   $(signUpModal, 'margin-top', '100vh')
 
-}, signUpModalBackground);
+});
 
 
 function *nextLoadingChar(str) {
@@ -43,7 +40,7 @@ function take5s(cb = _.noop) {
   return new Promise((resolve) => setTimeout(() => resolve(cb()), 2000))
 }
 
-$.onClick(() => {
+$.onClick(submission)(() => {
   $(signupForm, 'display', 'none');
   signupLoading.innerHTML = 'LOADING ';
   const loadingChars = nextLoadingChar('>>>>>>>$$$$$$$$+++++++');
@@ -63,4 +60,4 @@ $.onClick(() => {
       signupOutput.innerHTML = JSON.stringify(_.pick(response, ['address', 'balance', 'email']));
     }))
 
-}, submission);
+});

@@ -57,7 +57,7 @@ const clearOrients = shadowChanges.map(box => {
 });
 
 // remove orientation effects when there is a mouse event
-$.onMouseMove(() => clearOrients.forEach(_.runFn));
+$.onMouseMove()(() => clearOrients.forEach(_.runFn));
 
 type ColorUpdator = {
   updateColorSpeed: Function,
@@ -72,13 +72,16 @@ const updaters: Array<ColorUpdator> = colorSwitchers.map(box =>
 );
 
 // update color speed of element based on distace from mouse
-$.onMouseMove((event) => updaters.map(updater => updater.updateColorSpeed(event)));
+$.onMouseMove()((event) => {
+  updaters.map(updater => updater.updateColorSpeed(event))
+});
+
 
 // FIXME (onResize) -- update center of element on window resize
-$.onResize(() => updaters.forEach(({ updateCenter }) => updateCenter()));
+// $.onResize()(() => updaters.forEach(({ updateCenter }) => updateCenter()));
 
 // change shadow angle and color depending mouse position relative to center of element
-$.onMouseMove(event => shadowChanges.map(box => updateBoxShadow(box)(event)));
+$.onMouseMove()(event => shadowChanges.map(box => updateBoxShadow(box)(event)));
 
 // continuously rotate element color
 colorTimeChangers.forEach(elem => {
@@ -95,13 +98,12 @@ colorMouses.forEach(elem => {
 
   let isHovering;
 
-  $.onHover(
+  $.onHover(elem)(
     enterEvent => isHovering = true,
-    leaveEvent => isHovering = false,
-    elem
+    leaveEvent => isHovering = false
   );
 
-  $.onMouseMove(event => {
+  $.onMouseMove()(event => {
     const dist = $.distanceFromCenter(elem, event);
     const hue = _.round(dist / 3);
     const adj = isHovering ? 180 : 0;
