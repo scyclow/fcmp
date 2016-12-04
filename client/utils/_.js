@@ -68,7 +68,7 @@ function wrap(number: number, max: number): number {
 }
 
 function isNumber(num: any): boolean {
-  return typeof num === 'number';
+  return typeof num === 'number' && num !== NaN;
 }
 
 function isBoolean(bool: any): boolean {
@@ -81,6 +81,10 @@ function isString(str: any): boolean {
 
 function isFunction(fn: any): boolean {
   return typeof fn === 'function';
+}
+
+function isDefined(def) {
+  return def !== undefined;
 }
 
 function last(thing: Array<any> | string) {
@@ -102,7 +106,6 @@ function betweenLinear(n: number, max: number, min: number): number {
 function portion(max: number, center: number): number {
   return (max - center) / (max+1);
 }
-
 
 function *timeGen(t: number=Infinity, fn=identity) {
   for (let i = 0; i < t; i++) yield fn(i);
@@ -153,11 +156,6 @@ function distance(a: Coords, b: Coords): number {
   return ((xDiff ** 2) + (yDiff ** 2)) ** 0.5;
 }
 
-function set(obj, prop, val) {
-  obj[prop] = val;
-  return obj;
-}
-
 function pick(obj, props) {
   return props.reduce((output, prop) => set(output, prop, obj[prop]), {});
 }
@@ -169,6 +167,57 @@ function extend(obj1, obj2) {
 
   return obj1;
 }
+
+function cond(conditions, _default = noop) {
+  for (let [condition, result] of conditions) {
+    if (condition) return result();
+  }
+  return _default()
+}
+
+const propsPath = (path) => cond([
+  [_.isString(path), () => path.split('.')],
+  [_.isArray(path), () => path]
+], () => { throw new Error('Path must be string or array') });
+
+function get(obj, path, _default) {
+  const props = propsPath(path);
+
+  let lastObj = obj;
+  for (let prop of props) {
+    if (isDefined(lastObj[prop])) {
+      lastObj = lastObj[prop]
+    }
+    else {
+      return _default;
+    }
+  }
+
+  return lastObj;
+}
+
+
+function set(obj, path, val) {
+  const props = propsPath(path);
+  const existingProps = props.slice(0, -1);
+  const lastProp = last(props);
+
+  let lastObj = obj;
+  for (let prop of existingProps) {
+    if (isDefined(lastObj[prop])) {
+      lastObj = lastObj[prop];
+    }
+    else {
+      const newObj = isNumber(Number(prop)) ? [] : {};
+      lastObj[prop] = newObj;
+      lastObj = newObj;
+    }
+  }
+
+  lastObj[lastProp] = val;
+  return obj;
+}
+
 
 
 module.exports = {
@@ -202,6 +251,8 @@ module.exports = {
   set,
   pick,
   extend,
+  get,
+  cond,
 
   sin,
   cos,
