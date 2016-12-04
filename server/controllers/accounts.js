@@ -6,23 +6,19 @@ async function find (req, res) {
     res.send(accounts);
   }
   catch (error) {
-    res.status(500).send({ error });
+    res.status(500).send({ error: error.message });
   }
 }
 
 async function create (req, res) {
   try {
-    const account = await Account.create({});
-    const secretToken = await account.createToken();
-    res.send({
-      secretToken,
-      address: account.address,
-      balance: account.balance,
-    });
+    const { address, balance, createToken } = await Account.create({});
+    const secretToken = await createToken();
+    res.send({ secretToken, address, balance });
   }
   catch (error) {
     console.error(error);
-    res.status(500).send({ error });
+    res.status(500).send({ error: error.message });
   }
 }
 

@@ -34,7 +34,10 @@ AccountSchema.methods = {
   },
 
   async createToken() {
-    return verification.signJWT({ address: this.address });
+    return verification.signJWT({
+      address: this.address,
+      _id: this._id
+    });
   },
 
   async transfer(payeeAddress, amount) {
