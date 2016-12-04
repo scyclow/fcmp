@@ -47,7 +47,8 @@ nav .nav-menu .nav-menu-item {
   height: 200px;
 
   display: inline-block;
-  border: 5px solid black;
+  border: 5px solid;
+  border-color: #999 #555;
   border-radius: 5px;
 
   font-size: 30px;

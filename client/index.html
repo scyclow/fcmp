@@ -70,6 +70,24 @@
     font-size: 20px;
     padding: 10px;
   }
+
+  .floater {
+    transition: margin-left 3.1s, margin-top 3.1s;
+    transition-timing-function: ease-in-out;
+
+    cursor: pointer;
+    position: absolute;
+    z-index: 300;
+
+    height: 100px;
+    width: 100px;
+    font-size: 32px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+  }
 </style>
 
 <body>
@@ -82,6 +100,16 @@
       <span class="nav-menu-item color-speed-distance">TERMS OF SERVICE</span>
     </div>
   </nav>
+
+  <div class="floater color-time-change">
+    $$$
+  </div>
+    <div class="floater color-time-change">
+    $$$
+  </div>
+    <div class="floater color-time-change">
+    $$$
+  </div>
 
   <div id='signup-modal-container'>
     <div class="signup-modal-background"></div>

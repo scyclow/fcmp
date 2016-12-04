@@ -2,6 +2,7 @@
 'use strict'
 
 const $ = require('./utils/$');
+const _ = require('./utils/_');
 
 window.IMPORTANT = {
   pause: false
@@ -12,4 +13,5 @@ $.onKeyPress(['p', 'P']) (() =>
 );
 
 require('./styles.js');
-require('./components/signup.js')
+require('./components/signup.js');
+require('./components/floater.js');
