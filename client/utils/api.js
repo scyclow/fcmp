@@ -2,19 +2,20 @@
 
 const _ = require('./_');
 
-const BASE_ADDR = 'http://localhost:8421/api/';
+const BASE_ADDR = process.env.BASE_API;
 
-function get(route = '', headers = {}) {
-  return fetch(BASE_ADDR + route, { headers })
-    .then(response => response.json())
+async function get(route = '', headers = {}) {
+  const response = await fetch(BASE_ADDR + route, { headers });
+  return response.json();
 }
 
-function post(route = '', body = {}, headers = {}) {
+async function post(route = '', withBody = {}, withHeaders = {}) {
+  const method = 'POST';
+  const headers = _.assign({ 'Content-Type': 'application/json' }, withHeaders);
+  const body = JSON.stringify(withBody);
 
-  return fetch(BASE_ADDR + route, {
-      method: 'POST',
-      body: JSON.stringify({ email: 'awe', pin: 123})
-    }).then(response => response.json())
+  const response = await fetch(BASE_ADDR + route, { headers, body, method });
+  return response.json();
 }
 
 module.exports = { get, post };
