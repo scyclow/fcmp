@@ -20,6 +20,7 @@ const atan = (ratio: number) => toDegree(Math.atan(ratio));
 
 const runFn = (fn: Function) => fn();
 const noop = () => {};
+const assign = Object.assign;
 
 type Coords = { x: number, y: number };
 function degreeAroundCenter(coords: Coords, center: Coords): number {
@@ -176,8 +177,8 @@ function cond(conditions, _default = noop) {
 }
 
 const propsPath = (path) => cond([
-  [_.isString(path), () => path.split('.')],
-  [_.isArray(path), () => path]
+  [isString(path), () => path.split('.')],
+  [isArray(path), () => path]
 ], () => { throw new Error('Path must be string or array') });
 
 function get(obj, path, _default) {
@@ -218,6 +219,12 @@ function set(obj, path, val) {
   return obj;
 }
 
+const promise = {
+  wait: (ms, result) => new Promise(resolve =>
+    setTimeout(() => resolve(result), ms)
+  )
+};
+
 
 
 module.exports = {
@@ -251,6 +258,7 @@ module.exports = {
   set,
   pick,
   extend,
+  assign,
   get,
   cond,
 
@@ -262,5 +270,7 @@ module.exports = {
   atan,
   toRadian,
   toDegree,
-  degreeAroundCenter
+  degreeAroundCenter,
+
+  promise
 };

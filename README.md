@@ -16,3 +16,7 @@ npm start -- starts app on port 8421
 # Mongo
 Mongo URI: `mongodb://<username>:<password>@<address>`
 `mongo <address> -u <username> -p <password>`
+
+
+# TODO
+Don't use babel-register in production

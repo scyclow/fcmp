@@ -56,7 +56,9 @@ function createAddress() {
   return [
     _.sample(keyWords),
     _.sample(keyWords).toUpperCase(),
-    randInsert(hash, _.sample(keyWords).toUpperCase())
+    '_',
+    _.sample(keyWords).toUpperCase(),
+    hash
   ].join('');
 }
 

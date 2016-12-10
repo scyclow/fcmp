@@ -8,7 +8,6 @@ floaters.forEach((floater, i) => {
     if (window.IMPORTANT.pause) return;
     const moveX = _.random(0, $.window.width) + 'px';
     const moveY = _.random(0, $.window.height) + 'px';
-    console.log($.width)
     $(floater, 'margin-left', moveX);
     $(floater, 'margin-top', moveY);
   };

@@ -205,6 +205,43 @@ http://event.fortunebuilders.com/class/?Contact0State=NY&utm_term=New%20York&utm
 
 
 
+$$$$$$$$$$$$$$$$
+
+UI theme: Elemenets float around the page. a few elements are nailed down, but most interface items float around the screen with a big click target. to get anything done, you need to click one of them.
+
+
+
+
+
+
+$$$$$$$$$$$$$
+
+
+User starts off with seed funding crom clicked elements floating around the page.
+
+creates new address -> transfers clicked FC to new address
+
+log into account
+messages in inbox, each one a different scam.
+  some of these scams steal money, others pay off
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 Weird appspector stuff --

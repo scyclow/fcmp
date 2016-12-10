@@ -48,7 +48,12 @@ TransferSchema.statics = {
       payee: payeeDoc._id,
     });
 
-    return _.assign(transfer._doc, { payer, payee }); // return JSON interpretation
+    const output = _.assign(
+      { payer, payee },
+      _.pick(transfer._doc, ['_id', 'status', 'createdAt', 'amount'])
+    );
+
+    return output;
   }
 }
 
@@ -60,6 +65,16 @@ TransferSchema.methods = {
   },
 
   async execute(token) {
+    // Prevent other calls from executing transfer
+    if (_.includes(['PENDING', 'FULFILLED'], this.status)) {
+      this.status = 'PROCESSING';
+      await this.save();
+    }
+    else {
+      throw new Error(`Transfer in progress.`);
+    }
+
+
     // Check if authorized
     if (!this.verifyTransfer(token)) throw new Error(`Payment is not authorized.`)
 
@@ -70,17 +85,9 @@ TransferSchema.methods = {
     if (!payee) throw new Error(`Payee address ${payee.address} does not exist.`);
     if (!payer) throw new Error(`Payer address ${payer.address} does not exist.`);
     if (payer.balance < amount) {
-      throw new Error(`${payer.address} does not have enough fastcash for this tansaction`);
+      throw new Error(`${payer.address} does not have enough fastcash for this transaction`);
     }
 
-    // Prevent other calls from executing transfer
-    if (this.status !== 'PENDING') {
-      throw new Error(`Transfer has already been made.`);
-    }
-    else {
-      this.status = 'PROCESSING';
-      await this.save();
-    }
 
     // Attempt to make transfer
     await payer.updateBalance(-amount);

@@ -21,6 +21,10 @@ const AccountSchema = new Schema({
     type: Number,
     default: 1
   },
+  description: {
+    type: String,
+    default: `Let's make fastcash fast!!!`
+  },
   createdAt: {
     type: Date,
     default: Date.now

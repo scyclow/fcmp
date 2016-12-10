@@ -11,6 +11,11 @@ router.get('/', accounts.find);
 // router.post('/transfer', auth.validate, users.transfer);
 router.post('/', accounts.create);
 
+router.post('/test', (req, res) => {
+  console.log(req.body)
+  res.send(req.body)
+})
+
 
 // // TESTING
 // if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {

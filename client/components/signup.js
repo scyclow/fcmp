@@ -36,28 +36,104 @@ function *nextLoadingChar(str) {
   while (true) yield str[i++ % str.length];
 }
 
-function take5s(cb = _.noop) {
-  return new Promise((resolve) => setTimeout(() => resolve(cb()), 2000))
-}
-
-$.onClick(submission)(() => {
+function setLoadingAnimation() {
   $(signupForm, 'display', 'none');
   signupLoading.innerHTML = 'LOADING ';
   const loadingChars = nextLoadingChar('>>>>>>>$$$$$$$$+++++++');
+
   const loadingAnimation = setInterval(
     () => signupLoading.innerHTML += loadingChars.next().value,
     50
   );
 
-  const request = api.post('users/', { email: 'bleh@blah.com', pin: '1234' })
-    .catch(e => console.error(e))
+  return () => {
+    clearInterval(loadingAnimation);
+    $(signupLoading, 'display', 'none');
+  }
+};
 
-  Promise.all([request, take5s()])
-    .then(() => clearInterval(loadingAnimation))
-    .then(() => $(signupLoading, 'display', 'none'))
-    .then(() => request.then(response => {
+function renderResponse({ address, secretToken }) {
+  return `
+    <style>
+      .response-section {
+        border-bottom: 1px solid;
+        overflow-wrap: break-word;
+        font-size: 18px;
+        padding: 5px 0;
+      }
 
-      signupOutput.innerHTML = JSON.stringify(_.pick(response, ['address', 'balance', 'email']));
-    }))
+      .response-data {
+        font-size: 28px;
+        background-color: #000;
+        color: #fff;
+      }
 
+      .api-section {
+        padding-bottom: 5px;
+        border-bottom: 1px dotted;
+      }
+    </style>
+
+    <div>
+      <div class="response-section">
+        YOUR NEW FASTCASH ADDRESS IS: <br>
+        <span class="response-data">${address}</span>
+      </div>
+      <div class="response-section">
+        This is your secret token DO NOT GIVE THIS TO ANYONE.
+        Whoever posseses this token will have unmitigated access to your fastcash account.<br>
+        SECRET TOKEN: <span class="response-data">${secretToken}</span>
+      </div>
+
+      <div class="response-section">
+        FASTCASHMONEYPLUS.biz is currently in Development Beta mode. As such, the public FASTCASH API is available, with a graphical user interface forthcoming. Esxpected sometime in early 2017.
+        <div class="api-section">
+          VIEW ALL FASTCASH ADDRESSES AND BALANCES: <br>GET \`
+            <a href="https://fastcashmoneyplus.herokuapp.com/api/accounts">
+              https://fastcashmoneyplus.herokuapp.com/api/accounts
+            </a>
+          \`
+        </div>
+        <div class="api-section">
+          CREATE A NEW ADDRESS: <br>POST \`https://fastcashmoneyplus.herokuapp.com/api/accounts\`
+        </div>
+        <div class="api-section">
+          VIEW ALL TRANSFERS: <br>GET
+            <a href="https://fastcashmoneyplus.herokuapp.com/api/transfers">
+              https://fastcashmoneyplus.herokuapp.com/api/transfers
+            </a>
+          \`
+        </div>
+        <div class="api-section">
+          TRANSFER FUNDS FROM YOUR ADDRESS TO ANOTHER ADDRESS
+          (NOTE: In development beta, this only queues transfers in the system. A second execution request is required for funds to change hands):<br>
+          POST \`https://fastcashmoneyplus.herokuapp.com/api/transfer\`<br>
+          WITH THE FOLLOWING JAVA SCRIPT OBJECT NOTATION ("JSON") INCLUDED IN THE REQUEST BODY:<br>
+          { payer: &lt;payer address&gt;, payee: &lt;payee address&gt;, amount: &lt;amount: Number&gt; }<br>
+          THE REQUEST RETURNS A "JSON" RESPONSE WITH THE FOLLOWING FIELDS:<br>
+          { _id: &lt;alpha-numeric identification string&gt;, createdAt: &lt;date of transfer request&gt;, staus: &lt;'PENDING' | 'PROCESSING' | 'FULFILLED'&gt; payer: &lt;payer address&gt;, payee: &lt;payee address&gt;, amount: &lt;amount: Number&gt; }
+        </div>
+        <div class="api-section">
+          EXECUTE TRANSFER:<br>
+          POST \`https://fastcashmoneyplus.herokuapp.com/api/transfer/execute\`<br>
+          WITH THE FOLLOWING JAVA SCRIPT OBJECT NOTATION ("JSON") INCLUDED IN THE REQUEST BODY:<br>
+          { transferId: &gt;_id of transfer request&lt;, payerToken: &gt;address's SECRET TOKEN&lt; }<br>
+          THE REQUEST WILL RETURN EITHER A 200 (the transfer was success) OR 500 (the transfer was unsuccess) RESPONSE CODE
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+$.onClick(submission)(async () => {
+  const clearLoadingAnimation = setLoadingAnimation();
+
+  const wait5s = _.promise.wait(2000);
+  const request = api.post('accounts').catch(e => console.error(e));
+
+  const [response, something] = await Promise.all([request, wait5s]);
+
+  clearLoadingAnimation();
+
+  signupOutput.innerHTML = renderResponse(response)
 });
