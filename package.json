@@ -33,6 +33,13 @@
   },
   "homepage": "https://github.com/scyclow/fcmp#readme",
   "dependencies": {
+    "babel-core": "^6.18.2",
+    "babel-loader": "^6.2.7",
+    "babel-plugin-transform-async-to-generator": "^6.16.0",
+    "babel-plugin-transform-exponentiation-operator": "^6.8.0",
+    "babel-plugin-transform-flow-strip-types": "^6.14.0",
+    "babel-plugin-transform-object-rest-spread": "^6.16.0",
+    "babel-register": "^6.16.3",
     "bcrypt": "^0.8.7",
     "body-parser": "^1.15.2",
     "cors": "^2.8.1",
@@ -43,13 +50,6 @@
     "morgan": "^1.7.0"
   },
   "devDependencies": {
-    "babel-core": "^6.18.2",
-    "babel-loader": "^6.2.7",
-    "babel-plugin-transform-async-to-generator": "^6.16.0",
-    "babel-plugin-transform-exponentiation-operator": "^6.8.0",
-    "babel-plugin-transform-flow-strip-types": "^6.14.0",
-    "babel-plugin-transform-object-rest-spread": "^6.16.0",
-    "babel-register": "^6.16.3",
     "css-loader": "^0.25.0",
     "flow-bin": "^0.35.0",
     "html-webpack-plugin": "^2.24.1",
