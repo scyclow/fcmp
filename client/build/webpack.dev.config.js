@@ -1,36 +1,15 @@
 'use strict';
 
-const path = require('path');
 const webpack = require('webpack');
-const html = (params) => new (require('html-webpack-plugin'))(params);
-const rootDir = (...paths) => path.join(__dirname, '../..', ...paths);
+const defaults = require('./webpack.default.config');
 
-module.exports = {
-  context: rootDir('client'),
-  entry: {
-    app: './index.js'
-  },
-  output: {
-    path: rootDir('docs'),
-    filename: '[name].bundle.js'
-  },
-  plugins: [
-    html({
-      template: rootDir('client/index.html'),
-      inject: 'body'
-    })
-  ],
-  module: {
-    rules: [{
-      test: /\.js$/,
-      exclude: /node_modules/,
-      use: [{
-        loader: 'babel-loader',
-        options: { plugins: ['transform-exponentiation-operator'] }
-      }]
-    }, {
-      test: /\.css/,
-      use: ['style-loader', 'css-loader']
-    }]
-  }
-};
+defaults.plugins.push(
+  new webpack.DefinePlugin({
+    'process.env':{
+      'NODE_ENV': JSON.stringify('development'),
+      'BASE_API': JSON.stringify('http://localhost:8421/api/')
+    }
+  })
+);
+
+module.exports = defaults;
