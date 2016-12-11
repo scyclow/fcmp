@@ -7,7 +7,8 @@ npm run dummyData -- populate dummy data in database.
 
 npm start -- starts app on port 8421
 
-
+# Deploy
+`npm run build && git aa && git cim && git push && git push heroku master`
 
 # Heroku
 - App hosted at https://fastcashmoneyplus.herokuapp.com/

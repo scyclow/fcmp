@@ -61,7 +61,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 10);
+/******/ 	return __webpack_require__(__webpack_require__.s = 13);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -91,6 +91,7 @@ const atan = ratio => toDegree(Math.atan(ratio));
 
 const runFn = fn => fn();
 const noop = () => {};
+const assign = Object.assign;
 
 function degreeAroundCenter(coords, center) {
   const x = center.x - coords.x;
@@ -126,7 +127,7 @@ function wrap(number, max) {
 }
 
 function isNumber(num) {
-  return typeof num === 'number';
+  return typeof num === 'number' && num !== NaN;
 }
 
 function isBoolean(bool) {
@@ -139,6 +140,10 @@ function isString(str) {
 
 function isFunction(fn) {
   return typeof fn === 'function';
+}
+
+function isDefined(def) {
+  return def !== undefined;
 }
 
 function last(thing) {
@@ -208,6 +213,68 @@ function distance(a, b) {
   return Math.pow(Math.pow(xDiff, 2) + Math.pow(yDiff, 2), 0.5);
 }
 
+function pick(obj, props) {
+  return props.reduce((output, prop) => set(output, prop, obj[prop]), {});
+}
+
+function extend(obj1, obj2) {
+  for (let [key, val] of enumerateObject(obj2)) {
+    obj1[key] = val;
+  }
+
+  return obj1;
+}
+
+function cond(conditions, _default = noop) {
+  for (let [condition, result] of conditions) {
+    if (condition) return result();
+  }
+  return _default();
+}
+
+const propsPath = path => cond([[isString(path), () => path.split('.')], [isArray(path), () => path]], () => {
+  throw new Error('Path must be string or array');
+});
+
+function get(obj, path, _default) {
+  const props = propsPath(path);
+
+  let lastObj = obj;
+  for (let prop of props) {
+    if (isDefined(lastObj[prop])) {
+      lastObj = lastObj[prop];
+    } else {
+      return _default;
+    }
+  }
+
+  return lastObj;
+}
+
+function set(obj, path, val) {
+  const props = propsPath(path);
+  const existingProps = props.slice(0, -1);
+  const lastProp = last(props);
+
+  let lastObj = obj;
+  for (let prop of existingProps) {
+    if (isDefined(lastObj[prop])) {
+      lastObj = lastObj[prop];
+    } else {
+      const newObj = isNumber(Number(prop)) ? [] : {};
+      lastObj[prop] = newObj;
+      lastObj = newObj;
+    }
+  }
+
+  lastObj[lastProp] = val;
+  return obj;
+}
+
+const promise = {
+  wait: (ms, result) => new Promise(resolve => setTimeout(() => resolve(result), ms))
+};
+
 module.exports = {
   between,
   betweenLinear,
@@ -236,6 +303,12 @@ module.exports = {
   distance,
   runFn,
   noop,
+  set,
+  pick,
+  extend,
+  assign,
+  get,
+  cond,
 
   sin,
   cos,
@@ -245,7 +318,9 @@ module.exports = {
   atan,
   toRadian,
   toDegree,
-  degreeAroundCenter
+  degreeAroundCenter,
+
+  promise
 };
 
 /***/ },
@@ -274,7 +349,7 @@ $.eventDimensions = event => ({
   y: event.clientY + window.pageYOffset
 });
 
-const eventListener = (eventType, hasCoords) => (fn, element = document) => {
+const eventListener = (eventType, hasCoords) => (element = document) => fn => {
   const one = elem => {
     const listener = hasCoords ? $.coordsEvent(fn) : fn;
     elem.addEventListener(eventType, listener);
@@ -292,12 +367,12 @@ const eventListener = (eventType, hasCoords) => (fn, element = document) => {
 
 $.onMouseMove = eventListener('mousemove', true);
 $.onHover = eventListener('mouseover');
-$.onOrient = fn => eventListener('deviceorientation')($.orientEvent(fn), window);
+$.onOrient = fn => eventListener('deviceorientation')(window)($.orientEvent(fn));
 $.onResize = eventListener('resize', true);
 
-const keypress = key => (fn, element) => eventListener('keypress')(event => {
+const keypress = key => (fn, element) => eventListener('keypress')(element)(event => {
   if (event.keyCode === keyDict[key]) return fn(event);
-}, element);
+});
 
 // key: string | Array<string>
 // => clearing function
@@ -338,18 +413,27 @@ $.orientEvent = fn => event => {
 
 $.distanceFromCenter = (elem, event) => _.distance($.center(elem), event.coords || $.eventDimensions(event));
 
-$.onHover = (fnEnter, fnLeave, element) => {
+$.onHover = element => (fnEnter, fnLeave) => {
   if (!_.isFunction(fnLeave) && !element) {
     element = fnLeave;
     fnLeave = null;
   }
 
-  const clears = [eventListener('mouseenter')(fnEnter, element), fnLeave ? eventListener('mouseleave')(fnLeave, element) : _.noop];
+  const clears = [eventListener('mouseenter')(element)(fnEnter), fnLeave ? eventListener('mouseleave')(element)(fnLeave) : _.noop];
 
   return () => clears.forEach(_.runFn);
 };
 
 $.onClick = eventListener('click', true);
+
+$.window = {
+  get width() {
+    return window.innerWidth;
+  },
+  get height() {
+    return window.innerHeight;
+  }
+};
 
 window.$ = $;
 module.exports = $;
@@ -499,15 +583,181 @@ module.exports = {
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
+const $ = __webpack_require__(1);
+const _ = __webpack_require__(0);
+
+const floaters = $.cls('floater');
+
+floaters.forEach((floater, i) => {
+  const moveFloater = () => {
+    if (window.IMPORTANT.pause) return;
+    const moveX = _.random(0, $.window.width) + 'px';
+    const moveY = _.random(0, $.window.height) + 'px';
+    $(floater, 'margin-left', moveX);
+    $(floater, 'margin-top', moveY);
+  };
+
+  moveFloater();
+  const floating = setInterval(moveFloater, _.random(1000, 3000, true));
+
+  $.onClick(floater)(() => {
+    console.log('clicked floader', i);
+    $(floater, 'display', 'none');
+    clearInterval(floating);
+  });
+});
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+const $ = __webpack_require__(1);
+const _ = __webpack_require__(0);
+const api = __webpack_require__(6);
+
+const callToAction = $.id('call-to-action');
+const signUpModal = $.id('signup-modal-container');
+const signUpModalBackground = $.cls('signup-modal-background')[0];
+const submission = $.id('signup-submission');
+const signupForm = $.id('signup-form');
+const signupLoading = $.id('signup-loading');
+const signupOutput = $.id('signup-output');
+
+const navHeight = '45px';
+const modalHeight = `calc(100vh - ${ navHeight }`;
+
+$(signUpModal, 'height', modalHeight);
+
+// display modal when call to action is clicked
+$.onClick(callToAction)(() => setTimeout(() => $(signUpModal, 'margin-top', '-75px'), 300));
+
+// Hide modal when clickin background
+$.onClick(signUpModalBackground)(() => {
+
+  $(signUpModal, 'margin-top', '100vh');
+});
+
+function* nextLoadingChar(str) {
+  let i = 0;
+  while (true) yield str[i++ % str.length];
+}
+
+function setLoadingAnimation() {
+  $(signupForm, 'display', 'none');
+  signupLoading.innerHTML = 'LOADING ';
+  const loadingChars = nextLoadingChar('>>>>>>>$$$$$$$$+++++++');
+
+  const loadingAnimation = setInterval(() => signupLoading.innerHTML += loadingChars.next().value, 50);
+
+  return () => {
+    clearInterval(loadingAnimation);
+    $(signupLoading, 'display', 'none');
+  };
+};
+
+function renderResponse({ address, secretToken }) {
+  return `
+    <style>
+      .response-section {
+        border-bottom: 1px solid;
+        overflow-wrap: break-word;
+        font-size: 18px;
+        padding: 5px 0;
+      }
+
+      .response-data {
+        font-size: 28px;
+        background-color: #000;
+        color: #fff;
+      }
+
+      .api-section {
+        padding-bottom: 5px;
+        border-bottom: 1px dotted;
+      }
+    </style>
+
+    <div>
+      <div class="response-section">
+        YOUR NEW FASTCASH ADDRESS IS: <br>
+        <span class="response-data">${ address }</span>
+      </div>
+      <div class="response-section">
+        This is your secret token DO NOT GIVE THIS TO ANYONE.
+        Whoever posseses this token will have unmitigated access to your fastcash account.<br>
+        SECRET TOKEN: <span class="response-data">${ secretToken }</span>
+      </div>
+
+      <div class="response-section">
+        FASTCASHMONEYPLUS.biz is currently in Development Beta mode. As such, the public FASTCASH API is available, with a graphical user interface forthcoming. Esxpected sometime in early 2017.
+        <div class="api-section">
+          VIEW ALL FASTCASH ADDRESSES AND BALANCES: <br>GET \`
+            <a href="https://fastcashmoneyplus.herokuapp.com/api/accounts">
+              https://fastcashmoneyplus.herokuapp.com/api/accounts
+            </a>
+          \`
+        </div>
+        <div class="api-section">
+          CREATE A NEW ADDRESS: <br>POST \`https://fastcashmoneyplus.herokuapp.com/api/accounts\`
+        </div>
+        <div class="api-section">
+          VIEW ALL TRANSFERS: <br>GET
+            <a href="https://fastcashmoneyplus.herokuapp.com/api/transfers">
+              https://fastcashmoneyplus.herokuapp.com/api/transfers
+            </a>
+          \`
+        </div>
+        <div class="api-section">
+          TRANSFER FUNDS FROM YOUR ADDRESS TO ANOTHER ADDRESS
+          (NOTE: In development beta, this only queues transfers in the system. A second execution request is required for funds to change hands):<br>
+          POST \`https://fastcashmoneyplus.herokuapp.com/api/transfer\`<br>
+          WITH THE FOLLOWING JAVA SCRIPT OBJECT NOTATION ("JSON") INCLUDED IN THE REQUEST BODY:<br>
+          { payer: &lt;payer address&gt;, payee: &lt;payee address&gt;, amount: &lt;amount: Number&gt; }<br>
+          THE REQUEST RETURNS A "JSON" RESPONSE WITH THE FOLLOWING FIELDS:<br>
+          { _id: &lt;alpha-numeric identification string&gt;, createdAt: &lt;date of transfer request&gt;, staus: &lt;'PENDING' | 'PROCESSING' | 'FULFILLED'&gt; payer: &lt;payer address&gt;, payee: &lt;payee address&gt;, amount: &lt;amount: Number&gt; }
+        </div>
+        <div class="api-section">
+          EXECUTE TRANSFER:<br>
+          POST \`https://fastcashmoneyplus.herokuapp.com/api/transfer/execute\`<br>
+          WITH THE FOLLOWING JAVA SCRIPT OBJECT NOTATION ("JSON") INCLUDED IN THE REQUEST BODY:<br>
+          { transferId: &gt;_id of transfer request&lt;, payerToken: &gt;address's SECRET TOKEN&lt; }<br>
+          THE REQUEST WILL RETURN EITHER A 200 (the transfer was success) OR 500 (the transfer was unsuccess) RESPONSE CODE
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+$.onClick(submission)(_asyncToGenerator(function* () {
+  const clearLoadingAnimation = setLoadingAnimation();
+
+  const wait5s = _.promise.wait(2000);
+  const request = api.post('accounts').catch(function (e) {
+    return console.error(e);
+  });
+
+  const [response, something] = yield Promise.all([request, wait5s]);
+
+  clearLoadingAnimation();
+
+  signupOutput.innerHTML = renderResponse(response);
+}));
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
 "use strict";
 'use strict';
 
-__webpack_require__(9);
+__webpack_require__(12);
 
 const $ = __webpack_require__(1);
 const _ = __webpack_require__(0);
 const c = __webpack_require__(2);
-const { updateColorSpeedDistance, changeColors } = __webpack_require__(5);
+const { updateColorSpeedDistance, changeColors } = __webpack_require__(8);
 
 const colorSwitchers = $.cls('color-speed-distance');
 const colorMouses = $.cls('color-distance');
@@ -556,7 +806,7 @@ const clearOrients = shadowChanges.map(box => {
 });
 
 // remove orientation effects when there is a mouse event
-$.onMouseMove(() => clearOrients.forEach(_.runFn));
+$.onMouseMove()(() => clearOrients.forEach(_.runFn));
 
 const updaters = colorSwitchers.map(box => updateColorSpeedDistance(box, c.applyToHex('#ff0000', { h: _.random(360) }), baseSpeed, {
   primary: ['background-color'],
@@ -564,13 +814,15 @@ const updaters = colorSwitchers.map(box => updateColorSpeedDistance(box, c.apply
 }));
 
 // update color speed of element based on distace from mouse
-$.onMouseMove(event => updaters.map(updater => updater.updateColorSpeed(event)));
+$.onMouseMove()(event => {
+  updaters.map(updater => updater.updateColorSpeed(event));
+});
 
 // FIXME (onResize) -- update center of element on window resize
-$.onResize(() => updaters.forEach(({ updateCenter }) => updateCenter()));
+// $.onResize()(() => updaters.forEach(({ updateCenter }) => updateCenter()));
 
 // change shadow angle and color depending mouse position relative to center of element
-$.onMouseMove(event => shadowChanges.map(box => updateBoxShadow(box)(event)));
+$.onMouseMove()(event => shadowChanges.map(box => updateBoxShadow(box)(event)));
 
 // continuously rotate element color
 colorTimeChangers.forEach(elem => {
@@ -587,9 +839,9 @@ colorMouses.forEach(elem => {
 
   let isHovering;
 
-  $.onHover(enterEvent => isHovering = true, leaveEvent => isHovering = false, elem);
+  $.onHover(elem)(enterEvent => isHovering = true, leaveEvent => isHovering = false);
 
-  $.onMouseMove(event => {
+  $.onMouseMove()(event => {
     const dist = $.distanceFromCenter(elem, event);
     const hue = _.round(dist / 3);
     const adj = isHovering ? 180 : 0;
@@ -598,7 +850,48 @@ colorMouses.forEach(elem => {
 });
 
 /***/ },
-/* 4 */
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+'use strict';
+
+let get = (() => {
+  var _ref = _asyncToGenerator(function* (route = '', headers = {}) {
+    const response = yield fetch(BASE_ADDR + route, { headers });
+    return response.json();
+  });
+
+  return function get(_x, _x2) {
+    return _ref.apply(this, arguments);
+  };
+})();
+
+let post = (() => {
+  var _ref2 = _asyncToGenerator(function* (route = '', withBody = {}, withHeaders = {}) {
+    const method = 'POST';
+    const headers = _.assign({ 'Content-Type': 'application/json' }, withHeaders);
+    const body = JSON.stringify(withBody);
+
+    const response = yield fetch(BASE_ADDR + route, { headers, body, method });
+    return response.json();
+  });
+
+  return function post(_x3, _x4, _x5) {
+    return _ref2.apply(this, arguments);
+  };
+})();
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+const _ = __webpack_require__(0);
+
+const BASE_ADDR = "https://fastcashmoneyplus.herokuapp.com/api/";
+
+module.exports = { get, post };
+
+/***/ },
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -660,7 +953,7 @@ function dynamicInterval(fn) {
 module.exports = dynamicInterval;
 
 /***/ },
-/* 5 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -668,10 +961,9 @@ module.exports = dynamicInterval;
 
 'use strict';
 
-const $ = __webpack_require__(1);
 const _ = __webpack_require__(0);
 const c = __webpack_require__(2);
-const dynamicInterval = __webpack_require__(4);
+const dynamicInterval = __webpack_require__(7);
 const atLeast1 = _.atLeast(1);
 
 const changeColors = (elem, baseColor, properties = {}) => {
@@ -742,21 +1034,21 @@ function updateColorSpeedDistance(elem, baseColor, baseSpeed) {
 module.exports = { updateColorSpeedDistance, changeColors };
 
 /***/ },
-/* 6 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(7)();
+exports = module.exports = __webpack_require__(10)();
 // imports
 
 
 // module
-exports.push([module.i, "\n* { padding: 0; margin:0; }\n\nnav {\n  width: 100%;\n  min-height: 50px;\n  position: fixed;\n  top: 0;\n  border: 5px solid black;\n}\n\nnav .nav-header {\n  font-size: 30px;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  border-bottom: 5px solid black;\n}\n\nnav .nav-menu {\n  display: flex;\n}\n\nnav .nav-menu .nav-menu-item {\n  flex: 1;\n  min-height: 30px;\n  border-right: 5px solid black;\n\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n\n.content {\n  margin-top: 80px;\n}\n\n.section {\n  height: 150px;\n  padding: 15px;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n\n#call-to-action {\n  width: 400px;\n  height: 200px;\n\n  display: inline-block;\n  border: 5px solid black;\n  border-radius: 5px;\n\n  font-size: 30px;\n\n  cursor: pointer;\n\n  transition: margin 100ms, box-shadow 90ms;\n}\n\n#call-to-action > * {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  height: 100%;\n  width: 100%;\n}\n\n.shadow-change {\n  box-shadow: 20px 20px 20px #000;\n}\n\n.shadow-change:active {\n  margin-top: 10px;\n  margin-left: 10px;\n  box-shadow: 0 0 0 !important;\n}\n\n@media (max-width: 420px) {\n  nav .nav-header {\n    font-size: 25px;\n  }\n\n  #call-to-action {\n    width: 300px;\n    height: 150px;\n  }\n}\n", ""]);
+exports.push([module.i, "\n* { padding: 0; margin:0; }\n\nnav {\n  width: 100%;\n  min-height: 50px;\n  position: fixed;\n  top: 0;\n  border: 5px solid black;\n}\n\nnav .nav-header {\n  font-size: 30px;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  border-bottom: 5px solid black;\n}\n\nnav .nav-menu {\n  display: flex;\n}\n\nnav .nav-menu .nav-menu-item {\n  flex: 1;\n  min-height: 30px;\n  border-right: 5px solid black;\n\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n\n.content {\n  margin-top: 120px;\n}\n\n.section {\n  padding: 15px;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n\n#call-to-action {\n  width: 400px;\n  height: 200px;\n\n  display: inline-block;\n  border: 5px solid;\n  border-color: #999 #555;\n  border-radius: 5px;\n\n  font-size: 30px;\n\n  cursor: pointer;\n\n  transition: margin 100ms, box-shadow 90ms;\n}\n\n#call-to-action > * {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  height: 100%;\n  width: 100%;\n}\n\n.shadow-change {\n  box-shadow: 20px 20px 20px #000;\n}\n\n.shadow-change:active {\n  margin-top: 10px;\n  margin-left: 10px;\n  box-shadow: 0 0 0 !important;\n}\n\n@media (max-width: 420px) {\n  nav .nav-header {\n    font-size: 25px;\n  }\n\n  #call-to-action {\n    width: 300px;\n    height: 150px;\n  }\n}\n", ""]);
 
 // exports
 
 
 /***/ },
-/* 7 */
+/* 10 */
 /***/ function(module, exports) {
 
 /*
@@ -812,7 +1104,7 @@ module.exports = function() {
 
 
 /***/ },
-/* 8 */
+/* 11 */
 /***/ function(module, exports) {
 
 /*
@@ -1064,16 +1356,16 @@ function updateLink(linkElement, obj) {
 
 
 /***/ },
-/* 9 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(6);
+var content = __webpack_require__(9);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
-var update = __webpack_require__(8)(content, {});
+var update = __webpack_require__(11)(content, {});
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
@@ -1090,13 +1382,14 @@ if(false) {
 }
 
 /***/ },
-/* 10 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 'use strict';
 
 const $ = __webpack_require__(1);
+const _ = __webpack_require__(0);
 
 window.IMPORTANT = {
   pause: false
@@ -1104,23 +1397,9 @@ window.IMPORTANT = {
 
 $.onKeyPress(['p', 'P'])(() => window.IMPORTANT.pause = !window.IMPORTANT.pause);
 
+__webpack_require__(5);
+__webpack_require__(4);
 __webpack_require__(3);
-
-const callToAction = $.id('call-to-action');
-const signUpModal = $.id('signup-modal-container');
-const signUpModalBackground = $.cls('signup-modal-background')[0];
-
-const navHeight = '45px';
-const modalHeight = `calc(100vh - ${ navHeight }`;
-
-$(signUpModal, 'height', modalHeight);
-
-$.onClick(() => setTimeout(() => $(signUpModal, 'margin-top', '-35px'), 300), callToAction);
-
-$.onClick(() => {
-
-  $(signUpModal, 'margin-top', '100vh');
-}, signUpModalBackground);
 
 /***/ }
 /******/ ]);

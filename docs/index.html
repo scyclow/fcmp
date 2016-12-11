@@ -41,24 +41,53 @@
   }
 
   .signup-modal {
-    width: 75%
+    width: 75%;
     height: 75%;
     min-width: 300px;
     min-height: 300px;
     background-color: #fff;
     z-index: 502;
 
-    padding: 0 15px;
+    padding: 15px;
+    border: 5px solid black;
+    overflow: scroll;
   }
 
-  input {
+  .form-input {
+    border-bottom: 2px solid black;
+  }
+  .signup-modal input {
     font-size: 20px;
     border: 3px solid #888;
     background-color: #feb
   }
 
-  input:active, input:focus {
+  .signup-modal input:active, .signup-modal input:focus {
     background-color: #def;
+  }
+
+  #signup-submission {
+    cursor: pointer;
+    font-size: 20px;
+    padding: 10px;
+  }
+
+  .floater {
+    transition: margin-left 3.1s, margin-top 3.1s;
+    transition-timing-function: ease-in-out;
+
+    cursor: pointer;
+    position: absolute;
+    z-index: 300;
+
+    height: 100px;
+    width: 100px;
+    font-size: 32px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
   }
 </style>
 
@@ -73,23 +102,41 @@
     </div>
   </nav>
 
+  <div class="floater color-speed-distance"> $$$ </div>
+  <div class="floater color-speed-distance"> $$$ </div>
+  <div class="floater color-speed-distance"> $$$ </div>
+  <div class="floater color-speed-distance"> $$$ </div>
+  <div class="floater color-speed-distance"> $$$ </div>
+  <div class="floater color-speed-distance"> $$$ </div>
+  <div class="floater color-speed-distance"> $$$ </div>
+  <div class="floater color-speed-distance"> $$$ </div>
+  <div class="floater color-speed-distance"> $$$ </div>
+  <div class="floater color-speed-distance"> $$$ </div>
+  <div class="floater color-speed-distance"> $$$ </div>
+  <div class="floater color-speed-distance"> $$$ </div>
+
   <div id='signup-modal-container'>
     <div class="signup-modal-background"></div>
     <div class="signup-modal">
       <div>
         <h2>SIGN UP FOR FAST CASH NOW</h2>
       </div>
-      <div>
-        email address => <input placeholder="email address">
-      </div>
-      <div>
-        password (please choose a password with between 3 and 7 non-numeric characters) => <input placeholder="password (please choose a password with between 3 and 7 non-numeric characters) => ">
-      </div>
-      <div>
-        date of birth dd/mm/yyyy => <input placeholder="date of birth dd/mm/yyyy">
+      <div id="signup-form">
+        <div class="form-input">
+          email address -- may be used to contact you for PIN reset and future promotions => <input placeholder="email address -- may be used to contact you for ">
+        </div>
+        <div class="form-input">
+          please enter a secret PIN here. DO NOT REVEAL THIS PIN TO ANYONE WHO ASKS YOU FOR IT. this pin will unlock all transaction privelges for your FASTCASH account. Save this for later, as it may be used to access the fastcash sent to the associated FASTCASH account => <input placeholder="please enter a secret PIN here. DO NOT REVEAL THIS PIN TO ANYONE WHO ASKS YOU FOR IT. this pin will unlock all transaction privelges for your FASTCASH account. Save this for later, as it may be used to access the fastcash sent to the associated FASTCASH account => ">
+        </div>
+        <div class="form-input">
+          date of birth dd/mm/yyyy => <input placeholder="date of birth dd/mm/yyyy">
+        </div>
+
+        <button id="signup-submission">SUBMIT FORM</button>
       </div>
 
-      <button>SUBMIT</button>
+      <div id="signup-loading"></div>
+      <div id="signup-output"></div>
     </div>
   </div>
 
@@ -122,11 +169,11 @@
       FastCashMoneyPlus has brought happiness and meaning to thousands of human beings all accross the global economy.
     </div>
 
-    <div class="section">
-      "Fastcashmoneyplus is the premier digital currency platform of the 21st century. Don't be fooled by all the talk you hear about "cryptography currencies". These are the BEST way to lose your money. They are a SCAM. Only a fool would use a "currency" that lived on a public ledger without a central point of truth. If it sounds easy to hack, that's because it is! Hackers love the idea of you storing your wealth out in the open for the whole world to see. But they hardly stand a chance when your account is protected in the digital equivalent of a locked vault! {insert picture of locked vault} Only fastcashmoneyplus, with its patent-pending digital security infrastructure is equipped to protect you AND your digital wealth. "
+    <div class="section" style="margin-top: -20px;">
+      "Fastcashmoneyplus is the premier digital currency platform of the 21st century. Don't be fooled by all the talk you hear about "cryptography currencies". These are the BEST way to lose your money. They are a SCAM. Only a fool would use a "currency" that lived on a public ledger without a central point of truth. If it sounds easy to hack, that's because it is! Hackers love the idea of you storing your wealth out in the open for the whole world to see. But they hardly stand a chance when your account is protected in the digital equivalent of a locked vault! {../../images/secure_lock.jpeg} Only fastcashmoneyplus, with its patent-pending digital security infrastructure is equipped to protect you AND your digital wealth. "
     </div>
 
-    <div>
+    <div class="section">
       <h3>Reviews</h3>
       <br><br>
       "I used to be a struggling single mother in the Bronx before I discovered fcmp.biz. and then my life was turned around. Now I can afford to pay for college for my children." Wendy Pilsen
@@ -137,6 +184,10 @@
 
       </div>
     </div>
+  </div>
+
+  <div class="section">
+    FASTCASHMONEYPLUS.biz. It's what all the digital currency professionals are using to generate incredible amounts of wealth. These elite investors don't talk about it on the likes of MSNBC or Fox Business because they want to keep all of the profit themselves. This is the investment secret they DONT WANT YOU TO KNOW ABOUT.
   </div>
 
 <script type="text/javascript" src="app.bundle.js"></script></body>
