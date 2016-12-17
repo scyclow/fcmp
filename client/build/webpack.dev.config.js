@@ -7,7 +7,8 @@ defaults.plugins.push(
   new webpack.DefinePlugin({
     'process.env':{
       'NODE_ENV': JSON.stringify('development'),
-      'BASE_API': JSON.stringify('http://localhost:8421/api/')
+      'API_ROOT': JSON.stringify('http://localhost:8421/api/'),
+      'CLIENT_ROOT': JSON.stringify('http://localhost:3000/')
     }
   })
 );

@@ -13,7 +13,8 @@ defaults.plugins.push(
   new webpack.DefinePlugin({
     'process.env':{
       'NODE_ENV': JSON.stringify('production'),
-      'BASE_API': JSON.stringify('https://fastcashmoneyplus.herokuapp.com/api/')
+      'API_ROOT': JSON.stringify('https://fastcashmoneyplus.herokuapp.com/api/'),
+      'CLIENT_ROOT': JSON.stringify('http://steviep.xyz/fcmp')
     }
   })
 );

@@ -1,23 +1,38 @@
 'use strict';
 
 const path = require('path');
-const html = (params) => new (require('html-webpack-plugin'))(params);
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const html = (params) => new HtmlWebpackPlugin(params);
 const rootDir = (...paths) => path.join(__dirname, '../..', ...paths);
 
 
 module.exports = {
   context: rootDir('client'),
   entry: {
-    app: './index.js'
+    index: './index.js',
+    addresses: './pages/addresses.js'
   },
   output: {
     path: rootDir('docs'),
     filename: '[name].bundle.js'
   },
+  resolve: {
+    modules: [
+      path.resolve('./client'),
+      'node_modules'
+    ]
+  },
   plugins: [
     html({
       template: rootDir('client/index.html'),
-      inject: 'body'
+      inject: 'body',
+      chunks: ['index']
+    }),
+    html({
+      filename: 'addresses/index.html',
+      template: rootDir('client/pages/addresses.html'),
+      inject: 'body',
+      chunks: ['addresses']
     })
   ],
   module: {

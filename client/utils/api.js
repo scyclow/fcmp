@@ -2,10 +2,10 @@
 
 const _ = require('./_');
 
-const BASE_ADDR = process.env.BASE_API;
+const API_ROOT = process.env.API_ROOT;
 
 async function get(route = '', headers = {}) {
-  const response = await fetch(BASE_ADDR + route, { headers });
+  const response = await fetch(API_ROOT + route, { headers });
   return response.json();
 }
 
@@ -14,8 +14,8 @@ async function post(route = '', withBody = {}, withHeaders = {}) {
   const headers = _.assign({ 'Content-Type': 'application/json' }, withHeaders);
   const body = JSON.stringify(withBody);
 
-  const response = await fetch(BASE_ADDR + route, { headers, body, method });
+  const response = await fetch(API_ROOT + route, { headers, body, method });
   return response.json();
 }
 
-module.exports = { get, post };
+module.exports = { get, post, root: API_ROOT };
