@@ -30,7 +30,8 @@ const keyWords = [
   'easy',
   'fear',
   'destiny',
-  'believe'
+  'believe',
+  'seared'
 ];
 
 function randInsert (original, content) {

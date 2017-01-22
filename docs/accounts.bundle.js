@@ -61,7 +61,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 14);
+/******/ 	return __webpack_require__(__webpack_require__.s = 15);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -1216,206 +1216,16 @@ if(false) {
 }
 
 /***/ },
-/* 11 */
+/* 11 */,
+/* 12 */,
+/* 13 */,
+/* 14 */,
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
+__webpack_require__(3);
 const $ = __webpack_require__(1);
-const _ = __webpack_require__(0);
-
-const floaters = $.cls('floater');
-
-floaters.forEach((floater, i) => {
-  const moveFloater = () => {
-    if (window.IMPORTANT.pause) return;
-    const moveX = _.random(0, $.window.width) + 'px';
-    const moveY = _.random(0, $.window.height) + 'px';
-    $(floater, 'margin-left', moveX);
-    $(floater, 'margin-top', moveY);
-  };
-
-  moveFloater();
-  const floating = setInterval(moveFloater, _.random(1000, 3000, true));
-
-  $.onClick(floater)(() => {
-    console.log('clicked floader', i);
-    $(floater, 'display', 'none');
-    clearInterval(floating);
-  });
-});
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
-
-const $ = __webpack_require__(1);
-const _ = __webpack_require__(0);
 const api = __webpack_require__(4);
-const API_ROOT = api.root;
-const CLIENT_ROOT = "http://steviep.xyz/fcmp/";
-
-const signupTemplate = __webpack_require__(13);
-
-const callToAction = $.id('call-to-action');
-const signUpModal = $.id('signup-modal-container');
-const signUpModalBackground = $.cls('signup-modal-background')[0];
-const submission = $.id('signup-submission');
-const signupForm = $.id('signup-form');
-const signupLoading = $.id('signup-loading');
-const signupOutput = $.id('signup-output');
-
-const navHeight = '45px';
-const modalHeight = `calc(100vh - ${ navHeight }`;
-
-$(signUpModal, 'height', modalHeight);
-
-// display modal when call to action is clicked
-$.onClick(callToAction)(() => setTimeout(() => $(signUpModal, 'margin-top', '-75px'), 300));
-
-// Hide modal when clickin background
-$.onClick(signUpModalBackground)(() => {
-
-  $(signUpModal, 'margin-top', '100vh');
-});
-
-function* nextLoadingChar(str) {
-  let i = 0;
-  while (true) yield str[i++ % str.length];
-}
-
-function setLoadingAnimation() {
-  $(signupForm, 'display', 'none');
-  signupLoading.innerHTML = 'LOADING ';
-  const loadingChars = nextLoadingChar('>>>>>>>$$$$$$$$+++++++');
-
-  const loadingAnimation = setInterval(() => signupLoading.innerHTML += loadingChars.next().value, 50);
-
-  return () => {
-    // clearInterval(loadingAnimation);
-    // $(signupLoading, 'display', 'none');
-  };
-};
-
-function renderResponse({ address, secretToken }) {
-  return signupTemplate({
-    address, secretToken, API_ROOT, CLIENT_ROOT
-  });
-}
-
-$.onClick(submission)(_asyncToGenerator(function* () {
-  const clearLoadingAnimation = setLoadingAnimation();
-
-  const wait5s = _.promise.wait(2000);
-  const request = api.post('accounts').catch(function (e) {
-    return console.error(e);
-  });
-
-  const [response, something] = yield Promise.all([request, wait5s]);
-
-  clearLoadingAnimation();
-
-  signupOutput.innerHTML = renderResponse(response);
-}));
-
-/***/ },
-/* 13 */
-/***/ function(module, exports) {
-
-module.exports = function (scope) {
-  return `<style>
-  .response-section {
-    border-bottom: 1px solid;
-    overflow-wrap: break-word;
-    font-size: 18px;
-    padding: 5px 0;
-  }
-
-  .response-data {
-    font-size: 28px;
-    background-color: #000;
-    color: #fff;
-  }
-
-  .response-data a {
-    color: #fff;
-  }
-
-  .api-section {
-    padding-bottom: 5px;
-    border-bottom: 1px dotted;
-  }
-</style>
-
-<div>
-  <div class="response-section">
-    YOUR NEW FASTCASH ADDRESS IS: <br>
-    <span class="response-data">${ scope.address }</span>
-  </div>
-  <div class="response-section">
-    This is your secret token DO NOT GIVE THIS TO ANYONE.
-    Whoever posseses this token will have unmitigated access to your fastcash account.<br>
-    SECRET TOKEN: <span class="response-data">${ scope.secretToken }</span>
-  </div>
-
-  <div class="response-section">
-    FASTCASHMONEYPLUS.biz is currently in Development Beta mode. As such, the public FASTCASH API is available, with a graphical user interface forthcoming. Esxpected sometime in early 2017.
-    <div class="api-section">
-      VIEW ALL FASTCASH ADDRESSES AND BALANCES:
-      <div class="response-data">
-        GET <a href="${ scope.CLIENT_ROOT }accounts">
-          ${ scope.API_ROOT }accounts
-        </a>
-      </div>
-    </div>
-    <div class="api-section">
-      CREATE A NEW ADDRESS:
-      <div class="response-data">
-        POST ${ scope.API_ROOT }accounts
-      </div>
-    </div>
-    <div class="api-section">
-      VIEW ALL TRANSFERS:
-      <div class="response-data">
-        GET <a href="${ scope.API_ROOT }transfers">
-          ${ scope.API_ROOT }transfers
-        </a>
-      </div>
-    </div>
-    <div class="api-section">
-      TRANSFER FUNDS FROM YOUR ADDRESS TO ANOTHER ADDRESS
-      (NOTE: In development beta, this only queues transfers in the system. A second execution request is required for funds to change hands):
-      <div class="response-data">
-        POST ${ scope.API_ROOT }transfer
-      </div>
-      WITH THE FOLLOWING JAVA SCRIPT OBJECT NOTATION ("JSON") INCLUDED IN THE REQUEST BODY:<br>
-      { payer: &lt;payer address&gt;, payee: &lt;payee address&gt;, amount: &lt;amount: Number&gt; }<br>
-      THE REQUEST RETURNS A "JSON" RESPONSE WITH THE FOLLOWING FIELDS:<br>
-      { _id: &lt;alpha-numeric identification string&gt;, createdAt: &lt;date of transfer request&gt;, staus: &lt;'PENDING' | 'PROCESSING' | 'FULFILLED'&gt; payer: &lt;payer address&gt;, payee: &lt;payee address&gt;, amount: &lt;amount: Number&gt; }
-    </div>
-    <div class="api-section">
-      EXECUTE TRANSFER:
-      <div class="response-data">
-        POST ${ scope.API_ROOT }transfer/execute
-      </div>
-      WITH THE FOLLOWING JAVA SCRIPT OBJECT NOTATION ("JSON") INCLUDED IN THE REQUEST BODY:<br>
-      { transferId: &gt;_id of transfer request&lt;, payerToken: &gt;address's SECRET TOKEN&lt; }<br>
-      THE REQUEST WILL RETURN EITHER A 200 (the transfer was success) OR 500 (the transfer was unsuccess) RESPONSE CODE
-    </div>
-  </div>
-</div>
-`;
-};
-
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
-
-"use strict";
-'use strict';
-
-const $ = __webpack_require__(1);
-const _ = __webpack_require__(0);
 
 window.IMPORTANT = {
   pause: false
@@ -1423,9 +1233,18 @@ window.IMPORTANT = {
 
 $.onKeyPress(['p', 'P'])(() => window.IMPORTANT.pause = !window.IMPORTANT.pause);
 
-__webpack_require__(3);
-__webpack_require__(12);
-__webpack_require__(11);
+const addressContainer = $.cls('account-addresses')[0];
+
+function renderAccounts(addesses) {
+  addressContainer.innerHTML = addesses.map(address => `
+    <div class="account-listing">
+      <div class="account-listing-address">ADDRESS: ${ address.address }</div>
+      <div class="account-listing-address">BALANCE: ${ address.balance }</div>
+    </div>
+  `).join('');
+}
+
+api.get('accounts').then(renderAccounts);
 
 /***/ }
 /******/ ]);

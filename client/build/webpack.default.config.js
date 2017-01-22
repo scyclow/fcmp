@@ -10,7 +10,7 @@ module.exports = {
   context: rootDir('client'),
   entry: {
     index: './index.js',
-    addresses: './pages/addresses.js'
+    accounts: './pages/accounts.js'
   },
   output: {
     path: rootDir('docs'),
@@ -29,10 +29,10 @@ module.exports = {
       chunks: ['index']
     }),
     html({
-      filename: 'addresses/index.html',
-      template: rootDir('client/pages/addresses.html'),
+      filename: 'accounts/index.html',
+      template: rootDir('client/pages/accounts.html'),
       inject: 'body',
-      chunks: ['addresses']
+      chunks: ['accounts']
     })
   ],
   module: {

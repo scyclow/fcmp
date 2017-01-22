@@ -2,7 +2,7 @@ const Account = require('../models/Account');
 
 async function find (req, res) {
   try {
-    const accounts = await Account.find();
+    const accounts = await Account.find().sort({ balance: -1 });
     res.send(accounts);
   }
   catch (error) {

@@ -6,7 +6,7 @@ const STATE = {};
 const actionsHandlers = [];
 
 
-
+function on(){}
 
 
 

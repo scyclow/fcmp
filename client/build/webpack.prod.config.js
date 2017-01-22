@@ -14,7 +14,7 @@ defaults.plugins.push(
     'process.env':{
       'NODE_ENV': JSON.stringify('production'),
       'API_ROOT': JSON.stringify('https://fastcashmoneyplus.herokuapp.com/api/'),
-      'CLIENT_ROOT': JSON.stringify('http://steviep.xyz/fcmp')
+      'CLIENT_ROOT': JSON.stringify('http://steviep.xyz/fcmp/')
     }
   })
 );
