@@ -1345,6 +1345,10 @@ module.exports = function (scope) {
     padding-bottom: 5px;
     border-bottom: 1px dotted;
   }
+
+  #signup-loading {
+    border: 1px solid black;
+  }
 </style>
 
 <div>
@@ -1386,7 +1390,7 @@ module.exports = function (scope) {
       TRANSFER FUNDS FROM YOUR ADDRESS TO ANOTHER ADDRESS
       (NOTE: In development beta, this only queues transfers in the system. A second execution request is required for funds to change hands):
       <div class="response-data">
-        POST ${ scope.API_ROOT }transfer
+        POST ${ scope.API_ROOT }transfers
       </div>
       WITH THE FOLLOWING JAVA SCRIPT OBJECT NOTATION ("JSON") INCLUDED IN THE REQUEST BODY:<br>
       { payer: &lt;payer address&gt;, payee: &lt;payee address&gt;, amount: &lt;amount: Number&gt; }<br>
@@ -1396,7 +1400,7 @@ module.exports = function (scope) {
     <div class="api-section">
       EXECUTE TRANSFER:
       <div class="response-data">
-        POST ${ scope.API_ROOT }transfer/execute
+        POST ${ scope.API_ROOT }transfers/execute
       </div>
       WITH THE FOLLOWING JAVA SCRIPT OBJECT NOTATION ("JSON") INCLUDED IN THE REQUEST BODY:<br>
       { transferId: &gt;_id of transfer request&lt;, payerToken: &gt;address's SECRET TOKEN&lt; }<br>
