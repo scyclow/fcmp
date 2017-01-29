@@ -24,8 +24,7 @@ const CleaningWeekSchema = new Schema({
 
 CleaningWeekSchema.methods = {
   async confirm(name) {
-    await this.update({ confirmations: _.uniq([name, ...this.confirmations]) });
-    return this;
+    return await this.update({ $addToSet: { confirmations: name } });
   }
 };
 
@@ -42,6 +41,13 @@ CleaningWeekSchema.statics = {
     const week = await this.findOne({ weekNumber, year });
 
     return week || this.create({ weekNumber, year });
+  },
+
+  async confirmCurrentWeek(name) {
+    const currentWeek = await this.getCurrentWeek();
+    await currentWeek.confirm(name);
+
+    return this.getCurrentWeek();
   }
 }
 

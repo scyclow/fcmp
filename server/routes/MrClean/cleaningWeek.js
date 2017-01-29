@@ -17,10 +17,9 @@ async function markWeekComplete (req, res) {
   const name = req.body.name || req.params.name;
 
   try {
-    const week = await CleaningWeek.getCurrentWeek();
-    const updated = await week.confirm(name);
+    const week = await CleaningWeek.confirmCurrentWeek(name);
 
-    res.send({ week: updated });
+    res.send({ week });
   }
   catch (error) {
     console.error(error);
