@@ -31,9 +31,6 @@ CleaningWeekSchema.methods = {
 CleaningWeekSchema.statics = {
   async getCurrentWeek() {
     let today = moment();
-    if (today.day() === 0) {
-      today = today.subtract(1, 'day');
-    }
 
     const weekNumber = today.isoWeek();
     const year = today.year();
