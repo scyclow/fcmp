@@ -33,6 +33,7 @@ CleaningWeekSchema.statics = {
     let today = moment().subtract(5, 'hours');
 
     const weekNumber = today.isoWeek();
+    console.log('THIS IS WEEK NUMBER ' + weekNumber);
     const year = today.year();
 
     const week = await this.findOne({ weekNumber, year });
