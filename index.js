@@ -1,6 +1,7 @@
+require('dotenv').config()
 console.log('Starting server', new Date());
-require('babel-register');
-console.log('Babel complete', new Date());
+// require('babel-register');
+// console.log('Babel complete', new Date());
 
 const express = require('express');
 const config = require('./config/env');
@@ -9,7 +10,8 @@ const connectMongo = require('./config/mongoose');
 // Configure express app
 const app = express();
 require('./config/express')(app);
-require('./server/routes')(app);
+// require('./server/routes')(app);
+require('./update')(app);
 
 // Start server
 const port = config.PORT;
@@ -32,7 +34,7 @@ connectMongo
     process.exit();
   });
 
-if (env === 'development') require('./client/devServer');
+// if (env === 'development') require('./client/devServer');
 
 
 module.exports = app;

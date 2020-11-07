@@ -6,13 +6,10 @@
   "scripts": {
     "start": "nodemon index.js --ignore ./client",
     "debug": "node --inspect index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --config client/build/webpack.prod.config.js",
-    "dummyData": "node ./scripts/_populateDummyData.js",
     "production": "npm install && NODE_ENV=production node index.js"
   },
   "engines": {
-    "node": "6.3.0"
+    "node": "12.19.0"
   },
   "repository": {
     "type": "git",
@@ -33,22 +30,17 @@
   },
   "homepage": "https://github.com/scyclow/fcmp#readme",
   "dependencies": {
-    "babel-core": "^6.18.2",
-    "babel-loader": "^6.2.7",
-    "babel-plugin-transform-async-to-generator": "^6.16.0",
-    "babel-plugin-transform-exponentiation-operator": "^6.8.0",
-    "babel-plugin-transform-flow-strip-types": "^6.14.0",
-    "babel-plugin-transform-object-rest-spread": "^6.16.0",
-    "babel-register": "^6.16.3",
-    "bcrypt": "^0.8.7",
-    "body-parser": "^1.15.2",
+    "bcrypt": "^5.0.0",
+    "body-parser": "^1.19.0",
     "cors": "^2.8.1",
-    "express": "^4.14.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
     "jsonwebtoken": "^7.1.9",
-    "lodash": "^4.15.0",
-    "moment": "^2.17.1",
+    "lodash": "^4.17.20",
+    "moment": "^2.29.1",
     "mongoose": "^4.6.0",
-    "morgan": "^1.7.0"
+    "morgan": "^1.10.0",
+    "pg": "^8.4.2"
   },
   "devDependencies": {
     "css-loader": "^0.25.0",

@@ -5,11 +5,11 @@ const auth = require('../controllers/auth');
 const router = Router();
 
 router.get('/', users.find);
+router.post('/', users.create);
 
 // should only work if authenticated
-router.get('/:address/:token', auth.validate, users.findOne);
-router.post('/transfer', auth.validate, users.transfer);
-router.post('/', users.create);
+// router.get('/:address/:token', auth.validate, users.findOne);
+// router.post('/transfer', auth.validate, users.transfer);
 
 
 // TESTING
