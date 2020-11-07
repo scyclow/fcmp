@@ -74,35 +74,40 @@ const { createAddress } = require('../server/utils/createAddress');
 // }
 
 const createUser = async (req, res) => {
-  const { email } = req.body;
+  try {
+    const { email, metadata } = req.body;
+    const email_ = Array.isArray(email) ? email[0] : email
 
-  if (!email.match(/^\S+@\S+$/)) {
-    res.status(500).send(`Invalid email: ${email}`)
-    return
+    if (!email_.match(/^\S+@\S+$/)) {
+      res.status(500).send(`Invalid email: ${email_}`)
+      return
+    }
+
+    const existingUser = await client.query(
+      'select email from fc_users where email = $1;',
+      [email_]
+    )
+
+    if (existingUser.rows.length) {
+      res.status(500).send(`User with email ${email_} already exists`)
+      return
+    }
+
+
+    await client.query(
+      `insert into fc_users (email, address, metadata) values ($1, $2, $3)`,
+      [email_, createAddress(), metadata ? JSON.stringify(metadata) : '{}']
+    )
+
+    const newUser = await client.query(
+      'select * from fc_users where email = $1;',
+      [email_]
+    )
+
+    res.send(JSON.stringify(newUser.rows[0], null, 4))
+  } catch (e) {
+    res.send(e)
   }
-
-  const existingUser = await client.query(
-    'select email from fc_users where email = $1;',
-    [email]
-  )
-
-  if (existingUser.rows.length) {
-    res.status(500).send(`User with email ${email} already exists`)
-    return
-  }
-
-
-  await client.query(
-    `insert into fc_users (email, address) values ($1, $2)`,
-    [email, createAddress()]
-  )
-
-  const newUser = await client.query(
-    'select * from fc_users where email = $1;',
-    [email]
-  )
-
-  res.send(JSON.stringify(newUser.rows[0], null, 4))
 }
 
 const getUsers = async (req, res) => {
